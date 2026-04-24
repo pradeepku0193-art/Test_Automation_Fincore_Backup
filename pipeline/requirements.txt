@@ -1,0 +1,15 @@
+# PySpark and dependencies
+pyspark==3.4.1
+
+# Database connectivity
+psycopg2-binary==2.9.9
+
+# Environment management
+python-dotenv==1.0.0
+
+# Data validation
+great-expectations==0.18.8
+
+# Utilities
+pandas==2.1.4
+numpy==1.26.2
