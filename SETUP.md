@@ -1,9 +1,14 @@
 # FinCore Bank - Local Setup Guide
 
-This guide provides detailed instructions for setting up FinCore Bank on your local machine **without Docker**.
+This guide provides instructions for running FinCore Bank on your local machine **without Docker**.
+
+Important:
+- Trainees are expected to self-install prerequisites using official documentation.
+- OS-specific installation support is intentionally not provided to avoid environment troubleshooting overhead.
+- For a consolidated local run, see README "Option 0: No‑Docker Quickstart" and the unified scripts `start-app.sh` (Linux/macOS) or `start-app.ps1` (Windows).
 
 ## Table of Contents
-- [Prerequisites Installation](#prerequisites-installation)
+- [Prerequisites (Self-Install)](#prerequisites-self-install)
 - [Database Setup](#database-setup)
 - [Backend API Setup](#backend-api-setup)
 - [Frontend UI Setup](#frontend-ui-setup)
@@ -14,120 +19,22 @@ This guide provides detailed instructions for setting up FinCore Bank on your lo
 
 ---
 
-## Prerequisites Installation
+## Prerequisites (Self-Install)
 
-### 1. Python 3.10+
+Install the following on your own using official guides. Environment setup support is out of scope for this training; please use your preferred package manager or installers.
 
-#### macOS
-```bash
-# Using Homebrew
-brew install python@3.10
+- Python 3.10+ (required for PySpark)
+  - Official: https://www.python.org/downloads/
+- Node.js 20.x LTS + npm
+  - Official: https://nodejs.org/
+- PostgreSQL 15.x
+  - Official: https://www.postgresql.org/download/
+- Java JDK 11 or 17 (required by PySpark)
+  - Official: https://adoptium.net/ or https://www.oracle.com/java/technologies/downloads/
+- Git 2.x
+  - Official: https://git-scm.com/downloads
 
-# Verify installation
-python3 --version
-```
-
-#### Linux (Ubuntu/Debian)
-```bash
-sudo apt update
-sudo apt install python3.10 python3.10-venv python3-pip
-
-# Verify installation
-python3 --version
-```
-
-#### Windows
-Download from [python.org](https://www.python.org/downloads/) and install. Ensure "Add Python to PATH" is checked.
-
-### 2. Node.js 20.x LTS
-
-#### macOS
-```bash
-# Using Homebrew
-brew install node@20
-
-# Verify installation
-node --version
-npm --version
-```
-
-#### Linux (Ubuntu/Debian)
-```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Verify installation
-node --version
-npm --version
-```
-
-#### Windows
-Download from [nodejs.org](https://nodejs.org/) and install the LTS version.
-
-### 3. PostgreSQL 15.x
-
-#### macOS
-```bash
-# Using Homebrew
-brew install postgresql@15
-brew services start postgresql@15
-
-# Verify installation
-psql --version
-```
-
-#### Linux (Ubuntu/Debian)
-```bash
-sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-sudo apt update
-sudo apt install postgresql-15
-
-# Start PostgreSQL
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-
-# Verify installation
-psql --version
-```
-
-#### Windows
-Download from [postgresql.org](https://www.postgresql.org/download/windows/) and install.
-
-### 4. Java JDK 11 or 17 (for PySpark)
-
-#### macOS
-```bash
-brew install openjdk@17
-echo 'export PATH="/usr/local/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
-
-# Verify installation
-java -version
-```
-
-#### Linux (Ubuntu/Debian)
-```bash
-sudo apt install openjdk-17-jdk
-
-# Verify installation
-java -version
-```
-
-#### Windows
-Download from [Oracle](https://www.oracle.com/java/technologies/downloads/) or [Adoptium](https://adoptium.net/).
-
-### 5. Git
-```bash
-# macOS
-brew install git
-
-# Linux
-sudo apt install git
-
-# Verify
-git --version
-```
+Optional validation commands (run if you wish to verify versions): `python --version`, `node --version`, `npm --version`, `psql --version`, `java -version`, `git --version`.
 
 ---
 
@@ -261,17 +168,12 @@ This installs:
 
 Create `app/client/.env`:
 ```env
-REACT_APP_API_URL=http://localhost:4000/api/v1
-REACT_APP_ENV=development
+VITE_API_URL=http://localhost:4000/api/v1
 ```
 
-### 4. Build and Start UI
+### 4. Start UI (Development)
 ```bash
-# Development mode (hot reload)
-npm start
-
-# Production build
-npm run build
+npm run dev
 ```
 
 ---

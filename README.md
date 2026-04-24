@@ -14,6 +14,7 @@ A complete banking system designed for test automation training. Features a mult
 **🎯 Use this if you DON'T want Docker and want to run everything locally on your laptop.**
 
 #### Linux/macOS
+
 ```bash
 # 1) Prereqs: PostgreSQL 15, Python 3.10+, Java 11/17, Node.js 20+
 
@@ -31,6 +32,7 @@ bash start-app.sh
 ```
 
 #### Windows (PowerShell)
+
 ```powershell
 # 1) Prereqs: PostgreSQL 15, Python 3.10+, Java 11/17, Node.js 20+
 
@@ -50,6 +52,7 @@ cd pipeline; python -m venv venv; .\venv\Scripts\Activate.ps1; `
 **✅ This runs 100% locally without Docker. Pipeline loads data to your local PostgreSQL.**
 
 ### Option 1: Docker (Recommended)
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/fincore-bank.git
@@ -69,16 +72,19 @@ bash pipeline/run_pipeline.sh good_data
 ```
 
 ### Option 2: Local Setup
+
 See [SETUP.md](SETUP.md) for detailed local installation instructions.
 
 ## 📋 Prerequisites
 
 ### For Docker Setup
+
 - **Docker Desktop** 4.x+ with Docker Compose v2
 - **Minimum RAM**: 8 GB (16 GB recommended for all services)
 - **Disk Space**: 10 GB free
 
 ### For Local Setup
+
 - **Python** 3.10+
 - **Node.js** 20.x LTS
 - **PostgreSQL** 15.x
@@ -100,55 +106,57 @@ Node.js   Great Expectations
 REST API  (Data Quality)
     ↓
 React 18 UI
-(Dark Theme)
 ```
 
 ## 🔌 Service Ports
 
-| Service | Port | URL | Purpose |
-|---------|------|-----|---------|
-| PostgreSQL | 5432 | `localhost:5432` | Database |
-| React UI | 3000 | http://localhost:3000 | Web Portal |
-| Node.js API | 4000 | http://localhost:4000/api/v1 | REST API |
-| Swagger UI | 4000 | http://localhost:4000/api/docs | API Documentation |
-| Jenkins | 8080 | http://localhost:8080 | CI/CD |
+| Service     | Port | URL                            | Purpose           |
+| ----------- | ---- | ------------------------------ | ----------------- |
+| PostgreSQL  | 5432 | `localhost:5432`             | Database          |
+| React UI    | 3000 | http://localhost:3000          | Web Portal        |
+| Node.js API | 4000 | http://localhost:4000/api/v1   | REST API          |
+| Swagger UI  | 4000 | http://localhost:4000/api/docs | API Documentation |
+| Jenkins     | 8080 | http://localhost:8080          | CI/CD             |
 
 ### 🔧 Changing Default Ports
 
 **If you want to use different ports**, update these files:
 
-| Component | File | Variable | Default |
-|-----------|------|----------|---------|
-| Backend API | `app/.env` | `API_PORT` | 4000 |
-| Frontend UI | `app/client/.env` | `VITE_API_URL` | http://localhost:4000/api/v1 |
-| Frontend UI | `app/client/vite.config.js` | `server.port` | 3000 |
-| PostgreSQL | `app/.env` | `DB_PORT` | 5432 |
-| PostgreSQL | `pipeline/.env` | `DB_PORT` | 5432 |
+| Component   | File                          | Variable         | Default                      |
+| ----------- | ----------------------------- | ---------------- | ---------------------------- |
+| Backend API | `app/.env`                  | `API_PORT`     | 4000                         |
+| Frontend UI | `app/client/.env`           | `VITE_API_URL` | http://localhost:4000/api/v1 |
+| Frontend UI | `app/client/vite.config.js` | `server.port`  | 3000                         |
+| PostgreSQL  | `app/.env`                  | `DB_PORT`      | 5432                         |
+| PostgreSQL  | `pipeline/.env`             | `DB_PORT`      | 5432                         |
 
 **Example**: To run API on port 5000 instead of 4000:
+
 1. Edit `app/.env`: Change `API_PORT=4000` to `API_PORT=5000`
 2. Edit `app/client/.env`: Change `VITE_API_URL=http://localhost:4000/api/v1` to `VITE_API_URL=http://localhost:5000/api/v1`
 3. Restart both services
 
-## 🎓 For Trainees: What You Can Ignore
+## 🎓 What You Can Ignore
 
 **⚠️ Don't waste time looking into these folders/files during training:**
 
 ### ❌ Infrastructure Files (Ignore These)
-- `.github/` - CI/CD workflows (already configured)
+
 - `docker-compose.yml` - Docker setup (use if needed, don't modify)
 - `Dockerfile` - Container build (already working)
 - `.dockerignore`, `.gitignore` - Git/Docker configs
 - `package-lock.json`, `venv/`, `node_modules/` - Auto-generated dependencies
 
 ### ❌ Configuration Files (Already Set Up)
+
 - `app/src/config/database.js` - Database connection (working)
 - `app/src/utils/swagger.js` - API docs (auto-generated)
 - `app/client/vite.config.js` - Build tool config
 - `app/client/tailwind.config.js` - Styling config
 - All `.env.example` files - Just copy to `.env` and use
 
-### ✅ Focus on These for Training
+### ✅ Focus on These for Case study
+
 - **`tests/`** - Write your test automation here (UC1-UC5)
 - **`data/`** - Understand good_data vs bad_data
 - **`pipeline/transformations.py`** - Study PySpark transformations
@@ -160,13 +168,15 @@ React 18 UI
 ## 🔐 Default Credentials
 
 ### Application Login
-| Username | Password | Role | Access Level |
-|----------|----------|------|--------------|
-| admin | Admin@123 | admin | Full read access |
-| viewer | Viewer@123 | read_only | Read-only access |
-| testuser | Test@123 | standard | Standard user |
+
+| Username | Password   | Role      | Access Level     |
+| -------- | ---------- | --------- | ---------------- |
+| admin    | Admin@123  | admin     | Full read access |
+| viewer   | Viewer@123 | read_only | Read-only access |
+| testuser | Test@123   | standard  | Standard user    |
 
 ### Database
+
 - **Host**: localhost
 - **Port**: 5432
 - **Database**: fincore
@@ -174,18 +184,21 @@ React 18 UI
 - **Password**: fincore123
 
 ### Jenkins
+
 - **Username**: admin
 - **Password**: (auto-generated on first run, check logs)
 
 ## 📊 Dataset Information
 
 ### Good Data (Clean)
+
 - **Customers**: 10,000 records
 - **Accounts**: 25,000 records
 - **Transactions**: 500,000 records
 - **Loans**: 8,000 records
 
 ### Bad Data (With Violations)
+
 Same volume with intentional data quality issues for testing Great Expectations validation.
 
 ## 🔄 Running the Pipeline
@@ -195,6 +208,7 @@ Same volume with intentional data quality issues for testing Great Expectations 
 **✅ This loads data to your local PostgreSQL database, NOT Docker.**
 
 #### Linux/macOS
+
 ```bash
 cd pipeline
 
@@ -209,6 +223,7 @@ bash run_pipeline.sh bad_data
 ```
 
 #### Windows (PowerShell)
+
 ```powershell
 cd pipeline
 
@@ -223,6 +238,7 @@ cd pipeline
 ```
 
 ### With Docker
+
 ```bash
 # Good data (clean)
 docker exec -it fincore-app bash pipeline/run_pipeline.sh good_data
@@ -232,6 +248,7 @@ docker exec -it fincore-app bash pipeline/run_pipeline.sh bad_data
 ```
 
 Expected output:
+
 ```
 Starting FinCore Bank Data Pipeline...
 Reading CSVs from data/good_data/...
@@ -247,6 +264,7 @@ Pipeline completed successfully!
 ## ✅ Verifying the System
 
 ### Check Database
+
 ```bash
 # Docker
 docker exec -it fincore-postgres psql -U admin -d fincore -c "SELECT COUNT(*) FROM customers;"
@@ -256,11 +274,13 @@ psql -U admin -d fincore -c "SELECT COUNT(*) FROM customers;"
 ```
 
 ### Check API Health
+
 ```bash
 curl http://localhost:4000/api/v1/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "ok",
@@ -271,6 +291,7 @@ Expected response:
 ```
 
 ### Check UI
+
 Open http://localhost:3000 in your browser and login with `admin` / `Admin@123`
 
 ## 🚦 Starting Backend + Frontend Together
@@ -278,6 +299,7 @@ Open http://localhost:3000 in your browser and login with `admin` / `Admin@123`
 **🎯 Use these scripts to start BOTH Backend API and Frontend UI with a single command.**
 
 ### Linux/macOS
+
 ```bash
 # Start both services (verbose output with icons)
 bash start-app.sh
@@ -291,6 +313,7 @@ bash start-app.sh
 ```
 
 ### Windows (PowerShell)
+
 ```powershell
 # Start both services (verbose output with icons)
 .\start-app.ps1
@@ -304,6 +327,7 @@ bash start-app.sh
 ```
 
 **Features**:
+
 - ✅ Checks prerequisites (Node.js, npm)
 - ✅ Auto-installs dependencies if missing
 - ✅ Creates `.env` files from templates
@@ -313,6 +337,7 @@ bash start-app.sh
 - ✅ Single Ctrl+C stops everything
 
 **Alternative**: Start services separately in different terminals:
+
 ```bash
 # Terminal 1 - Backend API
 cd app && npm run dev
@@ -324,35 +349,41 @@ cd app/client && npm run dev
 ## 🧪 Running Tests
 
 ### Data Quality Tests (UC1)
+
 ```bash
 cd tests/dq
 pytest test_great_expectations.py --html=reports/dq_report.html
 ```
 
 ### API Automation Tests (UC2)
+
 ```bash
 cd tests/api
 pytest --html=reports/api_report.html
 ```
 
 ### UI Automation Tests (UC3)
+
 ```bash
 cd tests/ui
 pytest --html=reports/ui_report.html
 ```
 
 ### Pipeline Tests (UC4)
+
 ```bash
 cd tests/pipeline
 pytest --html=reports/pipeline_report.html
 ```
 
 ### Full Test Suite (UC5 - Jenkins)
+
 Access Jenkins at http://localhost:8080 and run the `FinCore-Full-Test-Suite` job.
 
 ## 🛑 Stopping the System
 
 ### Docker
+
 ```bash
 # Stop all services
 docker compose down
@@ -362,6 +393,7 @@ docker compose down -v
 ```
 
 ### Local
+
 ```bash
 # Stop Node.js API (Ctrl+C in terminal)
 # Stop PostgreSQL service
@@ -372,6 +404,7 @@ brew services stop postgresql  # macOS
 ## 🐛 Troubleshooting
 
 ### Port Already in Use
+
 ```bash
 # Check what's using the port
 lsof -i :3000  # or :4000, :5432, :8080
@@ -381,10 +414,13 @@ kill -9 <PID>
 ```
 
 ### Docker Out of Memory
+
 Increase Docker Desktop memory allocation:
+
 - Docker Desktop → Settings → Resources → Memory → 8 GB minimum
 
 ### Pipeline Fails
+
 ```bash
 # Check logs
 docker logs fincore-app
@@ -394,6 +430,7 @@ docker exec -it fincore-postgres pg_isready -U admin
 ```
 
 ### Cannot Connect to Database
+
 ```bash
 # Restart PostgreSQL container
 docker restart fincore-postgres
@@ -402,6 +439,7 @@ docker restart fincore-postgres
 ```
 
 ### UI Not Loading
+
 ```bash
 # Check if API is running
 curl http://localhost:4000/api/v1/health
@@ -419,17 +457,18 @@ docker compose up -d --build fincore-app
 
 ## 🏦 Use Cases
 
-| UC | Title | Tools | Purpose |
-|----|-------|-------|---------|
+| UC  | Title                   | Tools                          | Purpose                             |
+| --- | ----------------------- | ------------------------------ | ----------------------------------- |
 | UC1 | Data Quality Validation | Great Expectations, PostgreSQL | Validate data quality post-pipeline |
-| UC2 | API Automation | pytest-bdd, requests | Test REST API endpoints |
-| UC3 | UI Automation | pytest-bdd, Playwright | Test web portal functionality |
-| UC4 | Pipeline Testing | PySpark, pytest | Unit test transformations |
-| UC5 | Jenkins CI/CD | Jenkins, All above | Orchestrate full test suite |
+| UC2 | API Automation          | pytest-bdd, requests           | Test REST API endpoints             |
+| UC3 | UI Automation           | pytest-bdd, Playwright         | Test web portal functionality       |
+| UC4 | Pipeline Testing        | PySpark, pytest                | Unit test transformations           |
+| UC5 | Jenkins CI/CD           | Jenkins, All above             | Orchestrate full test suite         |
 
 ## 🤝 Contributing
 
 This is a training project. For modifications:
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -442,6 +481,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🆘 Support
 
 For issues or questions:
+
 - Check [comprehensive-guide.md](comprehensive-guide.md)
 - Review [Troubleshooting](#-troubleshooting) section
 - Open an issue on GitHub
@@ -449,6 +489,7 @@ For issues or questions:
 ## 🎯 Training Objectives
 
 This system helps Data Quality Engineers learn:
+
 - ✅ PySpark data transformations
 - ✅ Great Expectations data validation
 - ✅ REST API testing with pytest-bdd
