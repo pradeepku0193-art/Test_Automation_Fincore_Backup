@@ -42,27 +42,11 @@ Optional validation commands (run if you wish to verify versions): `python --ver
 
 ### 1. Create Database and User
 
-#### macOS/Linux
-```bash
-# Switch to postgres user (Linux only)
-sudo -u postgres psql
-
-# Or directly connect (macOS)
-psql postgres
-
-# Run these SQL commands:
+Connect to PostgreSQL using `psql` with an admin user and run:
+```sql
 CREATE DATABASE fincore;
 CREATE USER admin WITH PASSWORD 'fincore123';
 GRANT ALL PRIVILEGES ON DATABASE fincore TO admin;
-\q
-```
-
-#### Windows
-```bash
-# Open psql from Start Menu or Command Prompt
-psql -U postgres
-
-# Run the same SQL commands as above
 ```
 
 ### 2. Initialize Schema
@@ -244,16 +228,8 @@ bash run_pipeline.sh good_data
 
 ## Running the System
 
-### Terminal 1: PostgreSQL
-```bash
-# Should already be running from setup
-# Check status:
-# macOS:
-brew services list | grep postgresql
-
-# Linux:
-sudo systemctl status postgresql
-```
+### Note: Database Service
+Ensure your local PostgreSQL service is running before starting the API/UI.
 
 ### Terminal 2: Backend API
 ```bash
@@ -307,115 +283,10 @@ Open browser: http://localhost:4000/api/docs
 
 ## Common Issues
 
-### Issue: Port Already in Use
-
-**Error**: `EADDRINUSE: address already in use :::4000`
-
-**Solution**:
-```bash
-# Find process using the port
-lsof -i :4000
-
-# Kill the process
-kill -9 <PID>
-```
-
-### Issue: PostgreSQL Connection Failed
-
-**Error**: `ECONNREFUSED` or `password authentication failed`
-
-**Solution**:
-```bash
-# Check PostgreSQL is running
-# macOS:
-brew services list
-
-# Linux:
-sudo systemctl status postgresql
-
-# Restart if needed
-brew services restart postgresql@15  # macOS
-sudo systemctl restart postgresql    # Linux
-
-# Verify credentials in .env match database
-```
-
-### Issue: PySpark Java Error
-
-**Error**: `JAVA_HOME is not set`
-
-**Solution**:
-```bash
-# macOS:
-export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
-
-# Linux:
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
-
-# Verify
-echo $JAVA_HOME
-java -version
-```
-
-### Issue: Python Module Not Found
-
-**Error**: `ModuleNotFoundError: No module named 'pyspark'`
-
-**Solution**:
-```bash
-# Ensure virtual environment is activated
-source venv/bin/activate  # macOS/Linux
-venv\Scripts\activate     # Windows
-
-# Reinstall requirements
-pip install -r requirements.txt
-```
-
-### Issue: npm Install Fails
-
-**Error**: Various npm errors
-
-**Solution**:
-```bash
-# Clear npm cache
-npm cache clean --force
-
-# Delete node_modules and package-lock.json
-rm -rf node_modules package-lock.json
-
-# Reinstall
-npm install
-```
-
-### Issue: React Build Fails
-
-**Error**: Memory errors during build
-
-**Solution**:
-```bash
-# Increase Node.js memory
-export NODE_OPTIONS="--max-old-space-size=4096"
-
-# Retry build
-npm run build
-```
-
-### Issue: Database Tables Not Created
-
-**Error**: Tables don't exist after running init.sql
-
-**Solution**:
-```bash
-# Check if init.sql ran successfully
-psql -U admin -d fincore -c "\dt"
-
-# If no tables, manually run:
-psql -U admin -d fincore -f db/init.sql
-
-# Check for errors in output
-```
+This section has been intentionally minimized to avoid OS-specific guidance. Trainees are expected to diagnose local environment issues independently. Focus areas:
+- Verify services are running (PostgreSQL, API, UI)
+- Confirm environment variables match your local configuration
+- Check logs in `logs/` and console output for actionable errors
 
 ---
 
