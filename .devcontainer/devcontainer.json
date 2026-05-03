@@ -1,0 +1,41 @@
+{
+  "name": "FinCore Bank",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17",
+      "jdkDistro": "ms"
+    },
+    "ghcr.io/devcontainers/features/postgres:1": { "version": "15" }
+  },
+  "forwardPorts": [3000, 4000, 5432],
+  "portsAttributes": {
+    "3000": { "label": "React UI", "onAutoForward": "notify" },
+    "4000": { "label": "Node API + Swagger", "onAutoForward": "notify" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "remoteEnv": {
+    "PGHOST": "localhost",
+    "PGPORT": "5432",
+    "PGDATABASE": "fincore",
+    "PGUSER": "admin",
+    "PGPASSWORD": "fincore123"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pytest",
+        "ms-toolsai.jupyter",
+        "42crunch.vscode-openapi"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}
