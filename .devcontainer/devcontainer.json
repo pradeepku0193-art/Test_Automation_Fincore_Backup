@@ -16,6 +16,7 @@
     "5432": { "label": "PostgreSQL", "onAutoForward": "silent" }
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "sudo service postgresql start",
   "remoteEnv": {
     "PGHOST": "localhost",
     "PGPORT": "5432",
