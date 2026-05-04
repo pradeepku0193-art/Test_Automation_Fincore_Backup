@@ -18,6 +18,12 @@ pass() { echo "  ✓ $1"; }
 fail() { echo "  ✗ FAILED: $1"; }
 warn() { echo "  ⚠ WARNING: $1"; }
 
+# ── [0/8] Passwordless sudo — MUST be first ──
+echo "[0/8] Configuring passwordless sudo..."
+echo "vscode ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/vscode-nopasswd > /dev/null
+sudo chmod 0440 /etc/sudoers.d/vscode-nopasswd
+echo "[0/8] DONE — all subsequent sudo calls are passwordless"
+
 # ── [1/8] Install PostgreSQL ─────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
