@@ -1,0 +1,234 @@
+{
+  "datasource_name": "fincore_pg",
+  "data_connector_name": "default_inferred_data_connector_name",
+
+  "tables": [
+
+    {
+      "table_name": "public.customers",
+      "suite_name": "customers_suite",
+      "expectations": [
+
+        {
+          "type": "expect_column_values_to_not_be_null",
+          "column": "email",
+          "meta": {
+            "business_rule": "No customer should have a NULL email"
+          }
+        },
+        {
+          "type": "expect_column_values_to_not_be_null",
+          "column": "name",
+          "meta": {
+            "business_rule": "Customer name is mandatory"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_in_set",
+          "column": "status",
+          "value_set": ["active", "inactive", "blocked"],
+          "meta": {
+            "business_rule": "Only allowed values: active, inactive, blocked"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_between",
+          "column": "date_of_birth",
+          "max_value": "now",
+          "meta": {
+            "business_rule": "Must be in the past — no future dates"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_unique",
+          "column": "email",
+          "meta": {
+            "business_rule": "No duplicate emails across customers"
+          }
+        },
+        {
+          "type": "expect_column_values_to_match_regex",
+          "column": "phone",
+          "regex": "^[+0-9(][0-9\\s\\-().x]{6,20}$",
+          "meta": {
+            "business_rule": "Must be numeric, 7 to 15 digits"
+          }
+        },
+        {
+          "type": "expect_table_row_count_to_be_between",
+          "min_value": 1,
+          "max_value": 1000000,
+          "meta": {
+            "business_rule": "Row count must be within a realistic range"
+          }
+        }
+      ]
+    },
+
+    {
+      "table_name": "public.accounts",
+      "suite_name": "accounts_suite",
+      "expectations": [
+
+        {
+          "type": "expect_column_values_to_not_be_null",
+          "column": "account_number",
+          "meta": {
+            "business_rule": "Every account must have a number"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_in_set",
+          "column": "account_type",
+          "value_set": ["savings", "current", "fixed_deposit"],
+          "meta": {
+            "business_rule": "Only: savings, current, fixed_deposit"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_in_set",
+          "column": "status",
+          "value_set": ["active", "dormant", "closed"],
+          "meta": {
+            "business_rule": "Only: active, dormant, closed"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_between",
+          "column": "balance",
+          "min_value": 0,
+          "row_condition": "col(\"account_type\") == \"savings\"",
+          "condition_parser": "great_expectations__experimental__",
+          "meta": {
+            "business_rule": "Savings accounts: balance must be >= 0"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_unique",
+          "column": "account_number",
+          "meta": {
+            "business_rule": "No duplicate account numbers"
+          }
+        }
+      ]
+    },
+
+    {
+      "table_name": "public.transactions",
+      "suite_name": "transactions_suite",
+      "expectations": [
+
+        {
+          "type": "expect_column_values_to_be_between",
+          "column": "amount",
+          "min_value": 0,
+          "meta": {
+            "business_rule": "Amount must be > 0 — no zero or negative"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_in_set",
+          "column": "transaction_type",
+          "value_set": ["credit", "debit", "transfer"],
+          "meta": {
+            "business_rule": "Only: credit, debit, transfer"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_in_set",
+          "column": "status",
+          "value_set": ["completed", "pending", "failed", "reversed"],
+          "meta": {
+            "business_rule": "Only: completed, pending, failed, reversed"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_between",
+          "column": "transaction_date",
+          "max_value": "now",
+          "meta": {
+            "business_rule": "Must not be in the future"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_unique",
+          "column": "reference_id",
+          "meta": {
+            "business_rule": "No duplicate reference IDs"
+          }
+        },
+        {
+          "type": "expect_column_values_to_not_be_null",
+          "column": "account_id",
+          "meta": {
+            "business_rule": "Every transaction must belong to an account"
+          }
+        }
+      ]
+    },
+
+    {
+      "table_name": "public.loans",
+      "suite_name": "loans_suite",
+      "expectations": [
+
+        {
+          "type": "expect_column_values_to_be_between",
+          "column": "interest_rate",
+          "min_value": 1,
+          "max_value": 30,
+          "meta": {
+            "business_rule": "Interest rate must be within valid range"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_between",
+          "column": "principal_amount",
+          "min_value": 0,
+          "meta": {
+            "business_rule": "Must be > 0"
+          }
+        },
+        {
+          "type": "expect_column_values_to_not_be_null",
+          "column": "outstanding_amount",
+          "meta": {
+            "business_rule": "Cannot be NULL"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_in_set",
+          "column": "status",
+          "value_set": ["active", "closed", "defaulted", "restructured"],
+          "meta": {
+            "business_rule": "Only: active, closed, defaulted, restructured"
+          }
+        },
+        {
+          "type": "expect_column_values_to_be_in_set",
+          "column": "loan_type",
+          "value_set": ["home", "personal", "auto", "education"],
+          "meta": {
+            "business_rule": "Only: home, personal, auto, education"
+          }
+        },
+        {
+          "type": "CUSTOM_EXPECTATION",
+          "name" : "expect_end_date_after_start_date",
+          "params" : {
+            "column_start" : "start_date",
+            "column_end"   : "end_date"
+          }
+        },
+        {
+          "type": "expect_column_values_to_not_be_null",
+          "column": "loan_duration_days",
+          "meta": {
+            "business_rule": "Must be computed and present"
+          }
+        }
+      ]
+    }
+
+  ]
+}

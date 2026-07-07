@@ -1,0 +1,87 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "loans_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "interest_rate",
+        "max_value": 30,
+        "min_value": 1
+      },
+      "meta": {
+        "business_rule": "Interest rate must be within valid range"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "principal_amount",
+        "min_value": 0
+      },
+      "meta": {
+        "business_rule": "Must be > 0"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "outstanding_amount"
+      },
+      "meta": {
+        "business_rule": "Cannot be NULL"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "status",
+        "value_set": [
+          "active",
+          "closed",
+          "defaulted",
+          "restructured"
+        ]
+      },
+      "meta": {
+        "business_rule": "Only: active, closed, defaulted, restructured"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "loan_type",
+        "value_set": [
+          "home",
+          "personal",
+          "auto",
+          "education"
+        ]
+      },
+      "meta": {
+        "business_rule": "Only: home, personal, auto, education"
+      }
+    },
+    {
+      "expectation_type": "expect_end_date_after_start_date",
+      "kwargs": {
+        "column_end": "end_date",
+        "column_start": "start_date"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "loan_duration_days"
+      },
+      "meta": {
+        "business_rule": "Must be computed and present"
+      }
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.18.8"
+  }
+}

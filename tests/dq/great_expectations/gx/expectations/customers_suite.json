@@ -1,0 +1,81 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "customers_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "email"
+      },
+      "meta": {
+        "business_rule": "No customer should have a NULL email"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "name"
+      },
+      "meta": {
+        "business_rule": "Customer name is mandatory"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "status",
+        "value_set": [
+          "active",
+          "inactive",
+          "blocked"
+        ]
+      },
+      "meta": {
+        "business_rule": "Only allowed values: active, inactive, blocked"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "date_of_birth",
+        "max_value": "2026-06-15"
+      },
+      "meta": {
+        "business_rule": "Must be in the past \u2014 no future dates"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "email"
+      },
+      "meta": {
+        "business_rule": "No duplicate emails across customers"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_match_regex",
+      "kwargs": {
+        "column": "phone",
+        "regex": "^[+0-9(][0-9\\s\\-().x]{6,20}$"
+      },
+      "meta": {
+        "business_rule": "Must be numeric, 7 to 15 digits"
+      }
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "max_value": 1000000,
+        "min_value": 1
+      },
+      "meta": {
+        "business_rule": "Row count must be within a realistic range"
+      }
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.18.8"
+  }
+}

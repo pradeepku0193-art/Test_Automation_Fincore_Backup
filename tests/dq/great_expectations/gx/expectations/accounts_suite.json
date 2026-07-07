@@ -1,0 +1,68 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "accounts_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "account_number"
+      },
+      "meta": {
+        "business_rule": "Every account must have a number"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "account_type",
+        "value_set": [
+          "savings",
+          "current",
+          "fixed_deposit"
+        ]
+      },
+      "meta": {
+        "business_rule": "Only: savings, current, fixed_deposit"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "status",
+        "value_set": [
+          "active",
+          "dormant",
+          "closed"
+        ]
+      },
+      "meta": {
+        "business_rule": "Only: active, dormant, closed"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "balance",
+        "condition_parser": "great_expectations__experimental__",
+        "min_value": 0,
+        "row_condition": "col(\"account_type\") == \"savings\""
+      },
+      "meta": {
+        "business_rule": "Savings accounts: balance must be >= 0"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "account_number"
+      },
+      "meta": {
+        "business_rule": "No duplicate account numbers"
+      }
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.18.8"
+  }
+}

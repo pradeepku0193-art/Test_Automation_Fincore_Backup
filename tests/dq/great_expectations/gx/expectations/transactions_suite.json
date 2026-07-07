@@ -1,0 +1,77 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "transactions_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "amount",
+        "min_value": 0
+      },
+      "meta": {
+        "business_rule": "Amount must be > 0 \u2014 no zero or negative"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "transaction_type",
+        "value_set": [
+          "credit",
+          "debit",
+          "transfer"
+        ]
+      },
+      "meta": {
+        "business_rule": "Only: credit, debit, transfer"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "status",
+        "value_set": [
+          "completed",
+          "pending",
+          "failed",
+          "reversed"
+        ]
+      },
+      "meta": {
+        "business_rule": "Only: completed, pending, failed, reversed"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "transaction_date",
+        "max_value": "2026-06-15"
+      },
+      "meta": {
+        "business_rule": "Must not be in the future"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "reference_id"
+      },
+      "meta": {
+        "business_rule": "No duplicate reference IDs"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "account_id"
+      },
+      "meta": {
+        "business_rule": "Every transaction must belong to an account"
+      }
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.18.8"
+  }
+}
