@@ -23,7 +23,7 @@ WHERE status='active'
 CUSTOMER_BY_ID = """
 SELECT *
 FROM public.customers
-WHERE id = %s
+WHERE id = 1
 """
 
 LOAN_BY_ID = """

@@ -1,5 +1,5 @@
-from pytest_bdd import scenarios, given, when, then
-from api.utils.config import (
+from pytest_bdd import scenarios, given, when, then, parsers
+from tests.api.utils.config import (
     TEST_USER,
     TEST_PASSWORD
 )
@@ -18,8 +18,12 @@ def registered_user():
     """
     pass
 
+@given("No credentials are provided")
+def no_credentials(context):
+    context["credentials"] = {}
 
-@when("I login with valid credentials")
+
+@when(parsers.parse('I POST valid credentials to "/auth/login"'))
 def login_with_valid_credentials(api_client, context):
 
     payload = {
@@ -35,7 +39,8 @@ def login_with_valid_credentials(api_client, context):
     context["response"] = response
 
 
-@when("I login with invalid password")
+
+@when(parsers.parse('I POST wrong password to "/auth/login"'))
 def login_with_invalid_password(api_client, context):
 
     payload = {
@@ -51,7 +56,7 @@ def login_with_invalid_password(api_client, context):
     context["response"] = response
 
 
-@when("I login with empty credentials")
+@when(parsers.parse('I POST empty body to "/auth/login"'))
 def login_with_empty_credentials(api_client, context):
 
     payload = {}
@@ -64,7 +69,7 @@ def login_with_empty_credentials(api_client, context):
     context["response"] = response
 
 
-@then("response status should be 200")
+@then("the response status should be 200")
 def validate_success_status(context):
 
     assert context["response"].status_code == 200
@@ -82,16 +87,37 @@ def validate_bad_request_status(context):
     assert context["response"].status_code == 400
 
 
-@then("JWT token should be present")
+@then("the response should contain a JWT token")
 def validate_jwt_token(context):
 
     response_json = context["response"].json()
 
-    # Most likely response:
-    # {
-    #   "token":"eyJ..."
-    # }
-
     assert "token" in response_json
-    assert response_json["token"] is not None
-    assert len(response_json["token"]) > 0
+
+    token = response_json["token"]
+
+    assert token
+   
+    assert len(token.split(".")) == 3
+
+    assert "user" in response_json
+
+@then("the response should contain an error message")
+def validate_error_message(context):
+
+    response_json = context["response"].json()
+
+    assert "error" in response_json
+
+    error_message = response_json["error"]
+
+    assert error_message
+
+@then("the response should contain a validation error")
+def validate_validation_error(context):
+    
+    response_json = context["response"].json()
+
+    assert "error" in response_json
+
+    assert response_json["error"] is not None
