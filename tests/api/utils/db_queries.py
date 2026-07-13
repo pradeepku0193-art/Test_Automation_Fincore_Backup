@@ -28,7 +28,7 @@ WHERE id = 5959
 
 TRANSACTION_BY_ID = """
 SELECT COUNT(*) AS cnt
-FROM dbo.transactions
+FROM public.transactions
 WHERE account_id = 5
 """
 

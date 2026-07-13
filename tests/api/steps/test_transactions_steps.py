@@ -1,3 +1,5 @@
+from urllib.parse import parse_qs, urlparse
+
 from pytest_bdd import scenarios,given, when, then, parsers
 from datetime import datetime
 
@@ -75,25 +77,32 @@ def validate_field_value(context,field,value):
 
 @then("the all returned transaction_dates fall within the range")
 def validate_transaction_date_range(context):
-
-    transactions = context["response"].json()
+    api_response = context["response"]
+    parsed = urlparse(api_response.url)
+    params = parse_qs(parsed.query)
+    transactions = context["response"].json().get("data", [])
 
     from_date = datetime.strptime(
-        "2024-06-10",
+        params["from_date"][0],
         "%Y-%m-%d"
     )
 
     to_date = datetime.strptime(
-        "2025-06-11",
+        params["to_date"][0],
         "%Y-%m-%d"
     )
+    print(to_date)
+    print(type(from_date))
 
     for txn in transactions:
 
-        txn_date = datetime.strptime(
-            txn["transaction_date"],
-            "%Y-%m-%d"
-        )
+        print(f"Validating transaction_date for transaction: {txn}")
+
+        txn_date = datetime.fromisoformat(txn["transaction_date"].replace("Z", ""))
+
+        print(f"Validating transaction_date: {txn_date}")
+        print(type(txn_date))
+        
 
         assert from_date <= txn_date <= to_date
 
@@ -102,7 +111,7 @@ def validate_transaction_date_range(context):
 @then("the All returned amounts are between 100 and 500")
 def validate_amount_range(context):
 
-    transactions = context["response"].json()
+    transactions = context["response"].json().get("data", [])
 
     for txn in transactions:
         print(f"txn: {txn}")
@@ -131,7 +140,7 @@ def validate_account_id(context):
 @then("the returned records should match the DB count")
 def validate_account_transaction_count(context,db_client):
 
-    api_data = context["response"].json()
+    api_data = context["response"].json().get("data", [])
 
     db_result = db_client.execute_query(
         TRANSACTION_BY_ID
