@@ -1,8 +1,10 @@
 import pytest
 
-from api.utils.api_client import APIClient
-from api.utils.db_client import DBClient
-from api.utils.config import *
+from tests.api.utils.api_client import APIClient
+from tests.api.utils.db_client import DBClient
+from tests.api.utils.config import *
+
+print("✅ Loading tests/conftest.py")
 
 
 @pytest.fixture(scope="session")
