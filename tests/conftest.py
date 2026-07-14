@@ -1,5 +1,6 @@
 import pytest
 
+
 from tests.api.utils.api_client import APIClient
 from tests.api.utils.db_client import DBClient
 from tests.api.utils.config import *
@@ -80,4 +81,7 @@ def validate_database(db_client):
 
 def pytest_html_report_title(report):
     report.title = "Fincore Banking API Test Report"
+
+
+
 

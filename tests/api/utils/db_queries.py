@@ -32,10 +32,9 @@ FROM public.transactions
 WHERE account_id = 5
 """
 
-LOAN_BY_ID = """
-SELECT id, customer_id, amount, status
+LOAN_COUNT = """
+SELECT COUNT(*) AS loan_count
 FROM public.loans
-WHERE id = %s
 """
 
 DASHBOARD_SUMMARY = """
