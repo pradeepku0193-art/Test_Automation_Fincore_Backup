@@ -6,6 +6,7 @@ Feature: Customers API
     Given  I am authenticated
 
   Scenario:Get all customers 
+  Scenario:Get all customers
     When I GET "/customers"
     Then the response status should be 200
     And the data array should be non-empty
