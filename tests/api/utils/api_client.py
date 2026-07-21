@@ -6,9 +6,10 @@ class APIClient:
         self.base_url = base_url
         self.token = token
     
-    def get(self, endpoint, token=None):
+    def get(self, endpoint, token=None, headers=None):
 
-        headers = {}
+        if headers is None:
+            headers = {}
 
         if token:
             headers["Authorization"] = f"Bearer {token}"
@@ -18,9 +19,10 @@ class APIClient:
         )
     
 
-    def post(self, endpoint, payload=None, token=None):
+    def post(self, endpoint, payload=None, token=None, headers=None):
 
-        headers = {}
+        if headers is None:
+            headers = {}
 
         if token:
             headers["Authorization"] = f"Bearer {token}"

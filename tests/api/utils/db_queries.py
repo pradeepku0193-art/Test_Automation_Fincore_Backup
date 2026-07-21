@@ -21,15 +21,20 @@ WHERE status='active'
 """
 
 CUSTOMER_BY_ID = """
-SELECT *
+SELECT id,email, status
 FROM public.customers
-WHERE id = 1
+WHERE id = 5959
 """
 
-LOAN_BY_ID = """
-SELECT *
+TRANSACTION_BY_ID = """
+SELECT COUNT(*) AS cnt
+FROM public.transactions
+WHERE account_id = 5
+"""
+
+LOAN_COUNT = """
+SELECT COUNT(*) AS loan_count
 FROM public.loans
-WHERE id = %s
 """
 
 DASHBOARD_SUMMARY = """

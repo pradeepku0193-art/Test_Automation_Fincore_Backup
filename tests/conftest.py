@@ -1,8 +1,11 @@
 import pytest
+from playwright.sync_api import sync_playwright
 
-from api.utils.api_client import APIClient
-from api.utils.db_client import DBClient
-from api.utils.config import *
+from tests.api.utils.api_client import APIClient
+from tests.api.utils.db_client import DBClient
+from tests.api.utils.config import *
+
+print("✅ Loading tests/conftest.py")
 
 
 @pytest.fixture(scope="session")
@@ -78,4 +81,35 @@ def validate_database(db_client):
 
 def pytest_html_report_title(report):
     report.title = "Fincore Banking API Test Report"
+
+@pytest.fixture(scope="function")
+def browser_page():
+
+    with sync_playwright() as p:
+
+        browser = p.chromium.launch(headless=True)
+
+        context = browser.new_context()
+
+        context.tracing.start(
+            screenshots=True,
+            snapshots=True
+        )
+
+
+        page = browser.new_page()
+
+        yield page
+
+        context.tracing.stop(
+            path="tests/reports/trace.zip"
+        )
+
+        
+
+
+        browser.close()
+
+
+
 
