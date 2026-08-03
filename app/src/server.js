@@ -15,6 +15,7 @@ require('dotenv').config();
 const { testConnection } = require('./config/database');
 const { setupSwagger } = require('./utils/swagger');
 const { errorHandler } = require('./middleware/errorHandler');
+const { getAllowedOrigins, isOriginAllowed } = require('./utils/cors');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -31,10 +32,7 @@ const app = express();
 const API_PORT = process.env.API_PORT || 4000;
 const UI_PORT = process.env.UI_PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:30000')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+const allowedOrigins = getAllowedOrigins(process.env.CORS_ORIGIN);
 
 // Security middleware
 app.use(helmet({
@@ -52,11 +50,7 @@ app.use('/api/', limiter);
 // CORS configuration
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin) {
-            return callback(null, true);
-        }
-
-        if (allowedOrigins.includes(origin)) {
+        if (isOriginAllowed(origin, allowedOrigins)) {
             return callback(null, true);
         }
 
