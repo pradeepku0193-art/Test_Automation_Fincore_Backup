@@ -17,4 +17,9 @@ Scenario: Empty form submission
     When I click Login without entering anything
     Then Validation messages appear for both fields
 
+Scenario: Logout
+    Given I am logged into the portal
+    When I click the logout button
+    Then I am redirected to the login page
+
 

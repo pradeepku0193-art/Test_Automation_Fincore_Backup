@@ -1,6 +1,7 @@
 from pytest_bdd import (scenarios, given, when, then)
 
 from tests.ui.pages.login_page import LoginPage
+from tests.ui.pages.dashboard_page import DashboardPage
 from tests.ui.utils.UI_config import *
 
 scenarios("../features/login_page.feature")
@@ -13,6 +14,21 @@ def open_login_page(browser_page, context):
     login_page.open(BASE_UI_URL)
 
     context["login_page"] = login_page
+
+@given("I am logged into the portal")
+def logged_in_user(browser_page, context):
+
+    login_page = LoginPage(browser_page)
+
+    login_page.open(BASE_UI_URL)
+
+    login_page.login(VALID_USR, VALID_PWD)
+
+    browser_page.wait_for_url("**/dashboard")
+
+    context["page"] = browser_page
+
+    context["dashboard_page"] = DashboardPage(browser_page)
 
 @when("I enter valid credentials and click Login")
 def valid_login(context):
@@ -28,6 +44,17 @@ def invalid_login(context):
 def empty_form(context):
 
     context["login_page"].click_login()
+
+
+@when("I click the logout button")
+def logout(context):
+    
+    dashboard_page = context["dashboard_page"]
+
+    print(type(dashboard_page))
+    print(dir(dashboard_page))
+
+    dashboard_page.click_logout_button()
 
 
 @then("I am redirected to the dashboard")
@@ -97,4 +124,13 @@ def validate_empty_form_errors(context):
     assert username_error != ""
 
     assert password_error != ""
+
+@then("I am redirected to the login page")
+def verify_logout(context):
+
+    page = context["page"]
+
+    page.wait_for_url("**/login")
+
+    assert "/login" in page.url
 

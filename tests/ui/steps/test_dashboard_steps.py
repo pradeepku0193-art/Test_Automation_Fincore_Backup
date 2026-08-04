@@ -15,15 +15,10 @@ from tests.ui.utils.db_queries import (TOTAL_CUSTOMERS, ACTIVE_ACCOUNTS, ACTIVE_
 scenarios("../features/dashboard.feature")
 
 
-# =====================================================
-# BACKGROUND
-# =====================================================
-
 @given("I am on the dashboard")
 def open_dashboard(
     browser_page,
-    context
-):
+    context):
     """
     Login and navigate to dashboard.
     """
@@ -89,14 +84,13 @@ def read_active_accounts(context):
         f"UI Active Accounts = "f"{context['ui_value']}")
 
 
-@then("Value matches DB count of accounts with status active")
+@then("Value matches DB count of accounts with status=active")
 def validate_active_accounts(context,db_client):
 
     db_count = db_client.execute_query(ACTIVE_ACCOUNTS)[0]["active_accounts"]
 
-    print(
-        f"DB Active Accounts = "f"{db_count}"
-    )
+    print(f"UI Active Accounts = {context['ui_value']}")
+    print(f"DB Active Accounts = "f"{db_count}")
 
     assert context["ui_value"] == db_count
 
@@ -112,16 +106,15 @@ def read_active_loans(context):
 
     context["ui_value"] = (dashboard.get_active_loans())
 
-    print(
-        f"UI Active Loans = "f"{context['ui_value']}")
+    print(f"UI Active Loans = "f"{context['ui_value']}")
 
 
-@then("Value matches DB count of loans with status active")
+@then("Value matches DB count of loans with status=active")
 def validate_active_loans(context,db_client):
 
     db_count = db_client.execute_query(ACTIVE_LOANS)[0]["active_loans"]
 
-    print(
-        f"DB Active Loans = "f"{db_count}")
+    print(f"UI Active Loans = {context['ui_value']}")
+    print(f"DB Active Loans = "f"{db_count}")
 
     assert context["ui_value"] == db_count

@@ -1,28 +1,55 @@
+from playwright.sync_api import Page
+import re
+
 
 class DashboardPage:
 
-    def __init__(self, page):
+    def __init__(self, page: Page):
 
         self.page = page
 
-        total_customers_card = ""
-        active_accounts_card = ""
-        active_loans_card = ""
+    logout_button = "button svg"
 
-        def get_total_customers(self):
+    def extract_number_from_text(self, card_text):
 
-            return int(
-                self.page.locator(self.total_customers_card).inner_text()
-            )
+        # Use regex to find the first occurrence of a number in the text
+        match = re.search(r'([\d,]+)', card_text)
 
-        def get_active_accounts(self):
+        if not match:
+            raise ValueError(f"No number found in the provided text: '{card_text}'")
+    
+        return int(match.group(1).replace(',', ''))  # Remove commas and convert to int
+      
 
-            return int(
-                self.page.locator(self.active_accounts_card).inner_text()
-            )
+    def click_logout_button(self):
 
-        def get_active_loans(self):
+        self.page.locator(self.logout_button).last.click()
 
-            return int(
-                self.page.locator(self.active_loans_card).inner_text()
-            )
+    total_customers_card = ("text=Total Customers")
+    active_accounts_card = ("text=Active Accounts")
+    active_loans_card = ("text=Active Loans")
+
+    def get_total_customers(self):
+
+        card_text = self.page.locator(self.total_customers_card).locator("..").inner_text()
+
+        print(f"Total Customers card text: {card_text}")
+
+        return self.extract_number_from_text(card_text)
+
+    def get_active_accounts(self):
+
+        card_text = self.page.locator(self.active_accounts_card).locator("..").inner_text()
+
+        print(f"Active Accounts card text: {card_text}")
+
+        return self.extract_number_from_text(card_text)
+
+
+    def get_active_loans(self):
+
+        card_text = self.page.locator(self.active_loans_card).locator("..").inner_text()
+
+        print(f"Active Loans card text: {card_text}")
+
+        return self.extract_number_from_text(card_text)
