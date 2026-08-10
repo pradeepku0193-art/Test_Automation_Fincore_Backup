@@ -39,6 +39,27 @@ class TransactionPage:
 
         self.page.click(self.apply_filter_btn)
 
+    def select_status(self,status):
+        self.page.select_option(self.status_dropdown,label=status)
+
+        self.page.click(self.apply_filter_btn)
+
+        self.page.wait_for_load_state("networkidle")
+
+    def get_statuses(self):
+
+        rows = self.page.locator(self.table_rows)
+
+        statuses = []
+
+        for i in range(rows.count()):
+
+            status = (rows.nth(i).locator("td").nth(5).inner_text().strip())
+
+            statuses.append(status)
+
+        return statuses
+
     def apply_date_filter(self,from_date,to_date):
 
         date_boxes = self.page.locator(self.date_inputs)

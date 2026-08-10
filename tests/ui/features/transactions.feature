@@ -10,6 +10,12 @@ Feature: Transactions Screen
     When I select type = Credit
     Then All visible rows show transaction_type = Credit
 
+  Scenario: Filter by status
+    Given I am on the transactions screen
+    When I select status = Completed
+    Then All visible rows show status = Completed
+  
+  
   Scenario: Filter by date range
     Given I am on the transactions screen
     When I set a from_date and to_date and apply

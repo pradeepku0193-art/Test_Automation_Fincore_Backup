@@ -61,6 +61,22 @@ def validate_credit(context):
 
         assert (txn_type.lower() == "credit")
 
+@when("I select status = Completed")
+def filter_status(context):
+
+    context["transaction_page"].select_status("Completed")
+
+@then('All visible rows show status = Completed')
+def validate_status(context):
+    
+    statuses = context["transaction_page"].get_statuses()
+
+    print(f"statuses: {statuses}")
+
+    for txn_status in statuses:
+
+        assert (txn_status.lower() == "completed")
+
 
 @when("I set a from_date and to_date and apply")
 def date_filter(context):
