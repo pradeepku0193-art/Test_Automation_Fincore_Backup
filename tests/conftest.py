@@ -1,6 +1,7 @@
 import pytest
+import os
 from playwright.sync_api import sync_playwright
-
+import pytest_html
 from tests.api.utils.api_client import APIClient
 from tests.api.utils.db_client import DBClient
 from tests.api.utils.config import *
@@ -80,7 +81,7 @@ def validate_database(db_client):
     
 
 def pytest_html_report_title(report):
-    report.title = "Fincore Banking API Test Report"
+    report.title = "Fincore Banking UI Automation Test Report"
 
 @pytest.fixture(scope="function")
 def browser_page():
@@ -109,6 +110,51 @@ def browser_page():
 
 
         browser.close()
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+
+    outcome = yield
+
+    report = outcome.get_result()
+
+    if report.when == "call" and report.failed:
+
+        page = None
+
+        if "browser_page" in item.funcargs:
+
+            page = item.funcargs["browser_page"]
+
+        elif "context" in item.funcargs:
+
+            context = item.funcargs["context"]
+
+            page = context.get("page")
+
+        if page:
+            screenshot_dir = ("tests/reports/screenshots")
+
+            os.makedirs(screenshot_dir,exist_ok=True)
+
+            screenshot_file = (f"{screenshot_dir}/"f"{item.name}.png")
+
+            page.screenshot(path=screenshot_file,full_page=True)
+            
+            print(f"Screenshot saved: {screenshot_file}")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

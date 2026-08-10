@@ -20,7 +20,11 @@ class LoanPage:
 
     def is_page_loaded(self):
 
-        return(self.page.locator(self.table_rows).count()>0)
+        row_count = self.page.locator(self.table_rows).count()
+
+        print("Row Count:", row_count)
+
+        return row_count > 0
 
     def loan_table_visible(self):
 
@@ -66,9 +70,14 @@ class LoanPage:
 
     def open_loan_row(self):
 
-        self.page.locator(self.table_rows).first.locator("td").nth(0).click()
+        rows = self.page.locator(self.table_rows)
 
-        self.page.wait_for_load_state("networkidle")
+        rows.first.locator("td").nth(0).click()
+
+        self.page.wait_for_timeout(3000)
+
+        print(f"Loan URL : {self.page.url}", flush=True)
+       
 
     def get_loan_detail_page_text(self):
 
@@ -78,11 +87,15 @@ class LoanPage:
 
         page_text = (self.get_loan_detail_page_text()).lower()
 
-        return (
-            "Loan Information".lower() in page_text and 
-            "Duration".lower() in page_text and
-            "Monthly EMI".lower() in page_text and
-            "Outstanding Amount".lower() in page_text and
-            "Intrest Rate".lower() in page_text and
-            "Principal Amount".lower() in page_text
+        print(f"Current URL: {self.page.url}",flush=True)
+
+        return all(text in page_text
+            for text in [
+                "loan information",
+                "duration",
+                "monthly emi",
+                "outstanding amount",
+                "interest rate",
+                "principal amount"
+            ]
         )
