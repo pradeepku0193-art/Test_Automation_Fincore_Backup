@@ -83,33 +83,28 @@ def validate_database(db_client):
 def pytest_html_report_title(report):
     report.title = "Fincore Banking UI Automation Test Report"
 
+CURRENT_PAGE = None
+
 @pytest.fixture(scope="function")
 def browser_page():
+
+    global CURRENT_PAGE
 
     with sync_playwright() as p:
 
         browser = p.chromium.launch(headless=True)
 
-        context = browser.new_context()
-
-        context.tracing.start(
-            screenshots=True,
-            snapshots=True
-        )
-
-
         page = browser.new_page()
+
+        CURRENT_PAGE = page
 
         yield page
 
-        context.tracing.stop(
-            path="tests/reports/trace.zip"
-        )
-
-        
-
-
         browser.close()
+
+import os
+import pytest
+
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -120,29 +115,23 @@ def pytest_runtest_makereport(item, call):
 
     if report.when == "call" and report.failed:
 
-        page = None
+        global CURRENT_PAGE
 
-        if "browser_page" in item.funcargs:
-
-            page = item.funcargs["browser_page"]
-
-        elif "context" in item.funcargs:
-
-            context = item.funcargs["context"]
-
-            page = context.get("page")
-
-        if page:
+        if CURRENT_PAGE:
             screenshot_dir = ("tests/reports/screenshots")
 
             os.makedirs(screenshot_dir,exist_ok=True)
 
-            screenshot_file = (f"{screenshot_dir}/"f"{item.name}.png")
+            screenshot_file = (f"{screenshot_dir}/{item.name}.png")
 
-            page.screenshot(path=screenshot_file,full_page=True)
+            try:
+                CURRENT_PAGE.screenshot(path=screenshot_file,full_page=True)
+
+                print(f"Screenshot saved: {screenshot_file}",flush=True)
+
+            except Exception as e:
+                print(f"Screenshot failed: {e}",flush=True)
             
-            print(f"Screenshot saved: {screenshot_file}")
-
 
 
 
