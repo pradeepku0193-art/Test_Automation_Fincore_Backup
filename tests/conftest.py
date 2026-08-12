@@ -5,6 +5,8 @@ import pytest_html
 from tests.api.utils.api_client import APIClient
 from tests.api.utils.db_client import DBClient
 from tests.api.utils.config import *
+from pytest_html import extras
+import base64
 
 print("✅ Loading tests/conftest.py")
 
@@ -113,6 +115,8 @@ def pytest_runtest_makereport(item, call):
 
     report = outcome.get_result()
 
+    extra = getattr(report, "extras", [])
+
     if report.when == "call" and report.failed:
 
         global CURRENT_PAGE
@@ -129,8 +133,18 @@ def pytest_runtest_makereport(item, call):
 
                 print(f"Screenshot saved: {screenshot_file}",flush=True)
 
+                #extra.append(extras.image(screenshot_file))
+                with open(screenshot_file, "rb") as image_file:
+                    image_data = image_file.read()
+                    encoded_image = base64.b64encode(image_data).decode("utf-8")
+                    extra.append(extras.image(encoded_image, mime_type="image/png", extension="png"))
+
+                
+
             except Exception as e:
                 print(f"Screenshot failed: {e}",flush=True)
+
+    report.extras = extra
             
 
 
