@@ -45,31 +45,21 @@ class CustomerPage:
             ).count() > 0
         )
 
-    def search_customer(
-            self,
-            customer_name):
+    def search_customer(self,customer_name):
 
-        self.page.fill(
-            self.search_box,
-            customer_name
-        )
+        self.page.fill(self.search_box,customer_name)
 
-        self.page.click(
-            self.search_button
-        )
+        self.page.click(self.search_button)
 
     def get_customer_names(self):
 
-        rows = self.page.locator(
-            self.table_rows
-        )
+        rows = self.page.locator(self.table_rows)
 
         names = []
 
         for i in range(rows.count()):
 
-            names.append(
-                rows.nth(i)
+            names.append(rows.nth(i)
                 .locator("td")
                 .nth(1)
                 .inner_text()
@@ -77,20 +67,13 @@ class CustomerPage:
 
         return names
 
-    def filter_status(
-            self,
-            status):
+    def filter_status(self,status):
 
-        self.page.select_option(
-            self.status_dropdown,
-            label=status
-        )
+        self.page.select_option(self.status_dropdown,label=status)
 
     def get_visible_statuses(self):
 
-        rows = self.page.locator(
-            self.table_rows
-        )
+        rows = self.page.locator(self.table_rows)
 
         statuses = []
 
@@ -107,9 +90,7 @@ class CustomerPage:
 
     def open_first_customer(self):
 
-        self.page.locator(
-            self.table_rows
-        ).first.click()
+        self.page.locator(self.table_rows).first.click()
 
     def customer_detail_visible(self):
 

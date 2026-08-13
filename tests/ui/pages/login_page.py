@@ -1,4 +1,7 @@
-from playwright.sync_api import Page
+from playwright.sync_api import Page, expect
+import re
+
+
 
 class LoginPage:
     
@@ -35,18 +38,29 @@ class LoginPage:
         self.enter_username(username)
         self.enter_password(password)
         self.click_login()
-    
-    def get_error_message(self):
 
-        print(self.page.content())
 
-        self.page.wait_for_selector(
-            "[data-testid='login-error']",
-                timeout=10000
-
+    @property
+    def error_message_locator(self):
+        return self.page.locator(
+            ".error-message, .alert-danger, .toast-error"
         )
 
-        return self.page.locator("[data-testid='login-error']").inner_text()
+    def get_error_message(self):
+        self.error_message_locator.wait_for(state="visible")
+        return self.error_message_locator.inner_text()
+
+    def verify_login_error_message(self):
+
+        error_locator = self.page.get_by_text(
+            re.compile(
+                r"login failed|invalid username or password|authentication failed",
+                re.IGNORECASE
+            )
+        )
+
+        expect(error_locator).to_be_visible(timeout=10000)
+    
     
     def is_login_page_loaded(self):
 

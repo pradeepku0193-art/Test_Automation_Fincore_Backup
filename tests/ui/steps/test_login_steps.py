@@ -1,4 +1,6 @@
 from pytest_bdd import (scenarios, given, when, then)
+import re
+from playwright.sync_api import expect
 
 from tests.ui.pages.login_page import LoginPage
 from tests.ui.pages.dashboard_page import DashboardPage
@@ -70,24 +72,33 @@ def verify_dashboard(context):
 @then("An error message is displayed on screen")
 def verify_error(context):
 
-    # error_message = (
-    #     context["login_page"].get_error_message()
-    # )
+    #error_message = (context["login_page"].get_error_message().lower())
 
     page = context["login_page"].page
 
-    page.wait_for_timeout(3000)
-
-    body_text = page.locator("body").inner_text()
-
-    assert (
-        "Login failed" in body_text
-        or
-        "Invalid credentials" in body_text
-        or
-        "Authentication failed" in body_text
+    error_locator = page.get_by_text(
+        re.compile(
+            r"login failed|invalid username or password|authentication failed",
+            re.IGNORECASE
+        )
     )
 
+    expect(error_locator).to_be_visible(timeout=10000)
+    #page.wait_for_timeout(3000)
+
+    #body_text = page.locator("body").inner_text()
+    #print(error_message)
+
+    # assert any (
+    #     msg in error_message
+    #     for msg in [
+    #         "invalid username or password",
+    #         "incorrect username or password",
+    #         "login failed",
+    #         "authentication failed",
+    #         "invalid credentials",
+    #     ]
+    # )
 
 
 

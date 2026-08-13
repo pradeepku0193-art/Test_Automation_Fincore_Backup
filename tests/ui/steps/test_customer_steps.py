@@ -22,14 +22,9 @@ def logged_in_user(
 
     login_page.open(BASE_UI_URL)
 
-    login_page.login(
-        VALID_USR,
-        VALID_PWD
-    )
+    login_page.login(VALID_USR,VALID_PWD)
 
-    browser_page.wait_for_url(
-        "**/dashboard"
-    )
+    browser_page.wait_for_url("**/dashboard")
 
     context["page"] = browser_page
 
@@ -90,25 +85,19 @@ def validate_search_results(context):
 @when("I select a status from the filter dropdown")
 def select_status(context):
 
-    context["customer_page"].filter_status(
-        "active"
-    )
+    context["customer_page"].filter_status("Active")
 
 
 @then("All visible rows show that status value")
 def validate_status(context):
 
-    statuses = (
-        context["customer_page"]
-        .get_visible_statuses()
-    )
+    statuses = (context["customer_page"].get_visible_statuses())
+
+    print(f"statusses : {statuses}")
 
     for status in statuses:
 
-        assert (
-            status.lower()
-            == "active"
-        )
+        assert (status.lower()== "active")
 
 
 @when("I click on a customer row")
