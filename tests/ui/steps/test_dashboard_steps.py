@@ -16,31 +16,19 @@ scenarios("../features/dashboard.feature")
 
 
 @given("I am on the dashboard")
-def open_dashboard(
-    browser_page,
-    context):
-    """
-    Login and navigate to dashboard.
-    """
-
+def open_dashboard(browser_page,context):
+    
     login_page = LoginPage(browser_page)
 
     login_page.open(BASE_UI_URL)
 
-    login_page.login(
-        VALID_USR,
-        VALID_PWD
-    )
+    login_page.login(VALID_USR,VALID_PWD)
 
-    browser_page.wait_for_url(
-        "**/dashboard"
-    )
+    browser_page.wait_for_url("**/dashboard")
 
     context["page"] = browser_page
 
-    context["dashboard"] = DashboardPage(
-        browser_page
-    )
+    context["dashboard"] = DashboardPage(browser_page)
 
 
 # =====================================================
@@ -54,8 +42,7 @@ def read_total_customers(context):
 
     context["ui_value"] = (dashboard.get_total_customers())
 
-    print(
-        f"UI Total Customers = "f"{context['ui_value']}")
+    print(f"UI Total Customers = "f"{context['ui_value']}")
 
 
 @then("Value matches SELECT COUNT(*) FROM customers")
@@ -63,8 +50,7 @@ def validate_total_customers(context,db_client):
 
     db_count = db_client.execute_query(TOTAL_CUSTOMERS)[0]["total_customers"]
 
-    print(
-        f"DB Total Customers = "f"{db_count}")
+    print(f"DB Total Customers = "f"{db_count}")
 
     assert context["ui_value"] == db_count
 
@@ -80,8 +66,7 @@ def read_active_accounts(context):
 
     context["ui_value"] = (dashboard.get_active_accounts())
 
-    print(
-        f"UI Active Accounts = "f"{context['ui_value']}")
+    print(f"UI Active Accounts = "f"{context['ui_value']}")
 
 
 @then("Value matches DB count of accounts with status=active")

@@ -38,9 +38,13 @@ def open_transactions(context):
 def filters_are_applied_on_transactions_screen(context):
 
     transaction_page = TransactionPage(context["page"])
+
     transaction_page.navigate()
+
     context["transaction_page"] = transaction_page
+
     transaction_page.apply_sample_filters()
+    
     context["filtered_count"] = (transaction_page.get_row_count()) 
 
 
