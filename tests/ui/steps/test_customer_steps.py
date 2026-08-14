@@ -85,7 +85,7 @@ def validate_search_results(context):
 @when("I select a status from the filter dropdown")
 def select_status(context):
 
-    context["customer_page"].filter_status("Active")
+    context["customer_page"].filter_status("active")
 
 
 @then("All visible rows show that status value")

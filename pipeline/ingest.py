@@ -56,6 +56,8 @@ class FincorePipeline:
             'user': os.getenv('DB_USER', 'admin'),
             'password': os.getenv('DB_PASSWORD', 'fincore123')
         }
+        # Optional schema to write into. If not set, default to 'public'.
+        self.db_schema = os.getenv('DB_SCHEMA', 'public')
         
         # JDBC URL
         self.jdbc_url = f"jdbc:postgresql://{self.db_config['host']}:{self.db_config['port']}/{self.db_config['database']}"
@@ -68,13 +70,45 @@ class FincorePipeline:
     
     def _create_spark_session(self) -> SparkSession:
         """Create and configure Spark session."""
-        spark = SparkSession.builder \
+        jar = self._get_postgres_jar()
+        # On Windows, Spark/Hadoop expects a winutils.exe available via HADOOP_HOME.
+        # If the environment variable is not set but a local `hadoop/bin/winutils.exe`
+        # exists in the pipeline folder, use it as a fallback to avoid the
+        # "HADOOP_HOME and hadoop.home.dir are unset" error.
+        try:
+            if os.name == 'nt':
+                script_dir = os.path.dirname(__file__)
+                local_hadoop = os.path.join(script_dir, 'hadoop')
+                winutils = os.path.join(local_hadoop, 'bin', 'winutils.exe')
+                if not (os.environ.get('HADOOP_HOME') or os.environ.get('hadoop.home.dir')):
+                    if os.path.exists(winutils):
+                        os.environ['HADOOP_HOME'] = local_hadoop
+                        os.environ['hadoop.home.dir'] = local_hadoop
+                        logger.info(f"Set HADOOP_HOME to {local_hadoop} because winutils.exe was found")
+                    else:
+                        logger.warning("HADOOP_HOME not set and winutils.exe not found. Download winutils.exe and place it in pipeline/hadoop/bin or set HADOOP_HOME environment variable. See https://wiki.apache.org/hadoop/WindowsProblems")
+        except Exception:
+            # Non-fatal: proceed and let Spark emit its own diagnostics if this fails
+            logger.debug("Failed to apply local HADOOP_HOME fallback", exc_info=True)
+
+        builder = SparkSession.builder \
             .appName(os.getenv('SPARK_APP_NAME', 'FinCore_Pipeline')) \
             .config("spark.driver.memory", os.getenv('SPARK_DRIVER_MEMORY', '4g')) \
-            .config("spark.executor.memory", os.getenv('SPARK_EXECUTOR_MEMORY', '4g')) \
-            .config("spark.jars", self._get_postgres_jar()) \
-            .getOrCreate()
-        
+            .config("spark.executor.memory", os.getenv('SPARK_EXECUTOR_MEMORY', '4g'))
+
+        # If a local jar path exists, pass it via spark.jars. If a Maven coordinate
+        # (e.g. org.postgresql:postgresql:42.x) is returned, use spark.jars.packages
+        # so Spark can download it from Maven.
+        try:
+            if os.path.exists(jar):
+                builder = builder.config("spark.jars", jar)
+            else:
+                builder = builder.config("spark.jars.packages", jar)
+        except Exception:
+            # If os.path.exists fails for any reason, fall back to packages
+            builder = builder.config("spark.jars.packages", jar)
+
+        spark = builder.getOrCreate()
         spark.sparkContext.setLogLevel("WARN")
         return spark
     
@@ -263,19 +297,28 @@ class FincorePipeline:
             table_name: Target table name
             mode: Write mode (overwrite, append)
         """
-        logger.info(f"Writing {df.count()} rows to table: {table_name}")
-        
-        df.write \
-            .format("jdbc") \
-            .option("url", self.jdbc_url) \
-            .option("dbtable", table_name) \
-            .option("user", self.db_config['user']) \
-            .option("password", self.db_config['password']) \
-            .option("driver", "org.postgresql.Driver") \
-            .mode(mode) \
-            .save()
-        
-        logger.info(f"✓ {table_name}: {df.count()} rows loaded")
+        logger.info(f"Writing {df.count()} rows to table: {table_name} (schema: {self.db_schema})")
+        full_table = f"{self.db_schema}.{table_name}" if self.db_schema else table_name
+
+        try:
+            df.write \
+                .format("jdbc") \
+                .option("url", self.jdbc_url) \
+                .option("dbtable", full_table) \
+                .option("user", self.db_config['user']) \
+                .option("password", self.db_config['password']) \
+                .option("driver", "org.postgresql.Driver") \
+                .mode(mode) \
+                .save()
+
+            logger.info(f"✓ {full_table}: {df.count()} rows loaded")
+        except Exception as e:
+            # Improve messaging for common permission issues
+            msg = str(e)
+            if 'permission denied for schema public' in msg.lower() or 'permission denied for schema' in msg.lower():
+                logger.error("Database permission error while writing. Ensure the DB user has CREATE/USAGE privileges on the target schema or set DB_SCHEMA to a schema the user owns.")
+                logger.error("SQL (as superuser): GRANT USAGE, CREATE ON SCHEMA public TO <db_user>;")
+            raise
     
     def run(self):
         """Execute the complete pipeline."""

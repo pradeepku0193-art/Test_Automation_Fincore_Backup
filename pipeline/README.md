@@ -84,6 +84,8 @@ bash run_pipeline.sh bad_data    # Data with violations
 6. Data folder and CSV files existence
 7. Database connectivity
 
+> Note: On Windows, this pipeline requires Java JDK 11 or 17. Java 25 and newer are unsupported with the bundled PySpark/Hadoop dependencies.
+
 ### `run_pipeline_docker.sh` - Docker Execution
 
 **Purpose**: Runs the pipeline inside the Docker container.

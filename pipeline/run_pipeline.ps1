@@ -1,67 +1,77 @@
 # FinCore Bank - PySpark Pipeline Execution Script (Windows PowerShell)
-# This script runs the data pipeline locally on Windows
-
+# This script runs the data pipeline locally on Windows.
+ 
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true, Position = 0)]
     [ValidateSet("good_data", "bad_data")]
     [string]$DataFolder
 )
-
+ 
 $ErrorActionPreference = "Stop"
-
+ 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  FinCore Bank - Data Pipeline (Windows)" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
-
+ 
 # Check prerequisites
 Write-Host "[1/5] Checking prerequisites..." -ForegroundColor Yellow
-
+ 
 # Check Python
-try {
-    $pythonVersion = python --version 2>&1
-    Write-Host "  ✓ Python: $pythonVersion" -ForegroundColor Green
-} catch {
-    Write-Host "  ✗ Python not found. Please install Python 3.10+" -ForegroundColor Red
+if (-Not (Get-Command python -ErrorAction SilentlyContinue)) {
+    Write-Host "  [ERROR] Python not found. Please install Python 3.10+" -ForegroundColor Red
     exit 1
 }
-
+ 
+$pythonVersion = python --version 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  [ERROR] Python is installed but not working correctly" -ForegroundColor Red
+    exit 1
+}
+Write-Host "  [OK] Python: $pythonVersion" -ForegroundColor Green
+ 
 # Check Java
-try {
-    $javaVersion = java -version 2>&1 | Select-String "version"
-    Write-Host "  ✓ Java: $javaVersion" -ForegroundColor Green
-} catch {
-    Write-Host "  ✗ Java not found. Please install Java JDK 11 or 17" -ForegroundColor Red
+if (-Not (Get-Command java -ErrorAction SilentlyContinue)) {
+    Write-Host "  [ERROR] Java not found. Please install Java JDK 11 or 17" -ForegroundColor Red
     exit 1
 }
-
+ 
+$javaVersionOutput = java --version 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  [ERROR] Java is installed but not working correctly" -ForegroundColor Red
+    exit 1
+}
+ 
+$javaVersionLine = $javaVersionOutput | Select-Object -First 1
+Write-Host "  [OK] Java: $javaVersionLine" -ForegroundColor Green
+ 
 # Check virtual environment
 Write-Host ""
 Write-Host "[2/5] Setting up Python virtual environment..." -ForegroundColor Yellow
-
+ 
 if (-Not (Test-Path "venv")) {
     Write-Host "  Creating virtual environment..." -ForegroundColor Gray
     python -m venv venv
 }
-
-# Activate virtual environment
+ 
 Write-Host "  Activating virtual environment..." -ForegroundColor Gray
 & ".\venv\Scripts\Activate.ps1"
-
+ 
 # Install dependencies
 Write-Host ""
 Write-Host "[3/5] Installing Python dependencies..." -ForegroundColor Yellow
 pip install -q -r requirements.txt
-Write-Host "  ✓ Dependencies installed" -ForegroundColor Green
-
+Write-Host "  [OK] Dependencies installed" -ForegroundColor Green
+ 
 # Check data folder
 Write-Host ""
 Write-Host "[4/5] Validating data folder..." -ForegroundColor Yellow
-
-$dataPath = Join-Path ".." "data" $DataFolder
+ 
+$dataRoot = Join-Path -Path ".." -ChildPath "data"
+$dataPath = Join-Path -Path $dataRoot -ChildPath $DataFolder
 if (-Not (Test-Path $dataPath)) {
-    Write-Host "  ✗ Data folder not found: $dataPath" -ForegroundColor Red
+    Write-Host "  [ERROR] Data folder not found: $dataPath" -ForegroundColor Red
     Write-Host ""
     Write-Host "Please generate datasets first:" -ForegroundColor Yellow
     Write-Host "  cd data" -ForegroundColor Gray
@@ -69,27 +79,24 @@ if (-Not (Test-Path $dataPath)) {
     Write-Host "  python generate_data.py" -ForegroundColor Gray
     exit 1
 }
-
-Write-Host "  ✓ Data folder found: $dataPath" -ForegroundColor Green
-
-# Check database connectivity
+Write-Host "  [OK] Data folder found: $dataPath" -ForegroundColor Green
+ 
+# Check database configuration
 Write-Host ""
 Write-Host "[5/5] Checking database connectivity..." -ForegroundColor Yellow
-
-# Load .env if exists
+ 
 if (Test-Path ".env") {
-    Get-Content .env | ForEach-Object {
+    Get-Content ".env" | ForEach-Object {
         if ($_ -match '^([^=]+)=(.*)$') {
             [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
         }
     }
 }
-
+ 
 $dbHost = if ($env:DB_HOST) { $env:DB_HOST } else { "localhost" }
 $dbPort = if ($env:DB_PORT) { $env:DB_PORT } else { "5432" }
-
 Write-Host "  Database: $dbHost`:$dbPort" -ForegroundColor Gray
-
+ 
 # Run pipeline
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
@@ -97,20 +104,32 @@ Write-Host "  Running PySpark Pipeline" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-$env:DATA_FOLDER = $DataFolder
+# Windows: if `HADOOP_HOME` is not set but a local winutils.exe exists, set HADOOP_HOME to that local folder
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$localHadoop = Join-Path -Path $scriptDir -ChildPath "hadoop"
+$winutilsPath = Join-Path -Path $localHadoop -ChildPath "bin\winutils.exe"
+if (-Not $env:HADOOP_HOME) {
+    if (Test-Path $winutilsPath) {
+        [System.Environment]::SetEnvironmentVariable("HADOOP_HOME", $localHadoop, "Process")
+        [System.Environment]::SetEnvironmentVariable("hadoop.home.dir", $localHadoop, "Process")
+        Write-Host "  [OK] Set HADOOP_HOME to $localHadoop" -ForegroundColor Green
+    } else {
+        Write-Host "  [WARN] HADOOP_HOME not set. If Spark fails, download winutils.exe and place it under pipeline\\hadoop\\bin, then rerun." -ForegroundColor Yellow
+    }
+}
 
-python ingest.py
-
+python ingest.py $DataFolder
+ 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Green
-    Write-Host "  ✓ Pipeline completed successfully!" -ForegroundColor Green
+    Write-Host "  Pipeline completed successfully!" -ForegroundColor Green
     Write-Host "========================================" -ForegroundColor Green
     Write-Host ""
 } else {
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Red
-    Write-Host "  ✗ Pipeline failed!" -ForegroundColor Red
+    Write-Host "  Pipeline failed!" -ForegroundColor Red
     Write-Host "========================================" -ForegroundColor Red
     Write-Host ""
     exit 1
