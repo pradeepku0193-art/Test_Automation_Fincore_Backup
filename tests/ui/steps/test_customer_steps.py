@@ -1,9 +1,4 @@
-from pytest_bdd import (
-    scenarios,
-    given,
-    when,
-    then
-)
+from pytest_bdd import (scenarios,given,when,then)
 
 from tests.ui.pages.customer_page import CustomerPage
 from tests.ui.pages.login_page import LoginPage
@@ -14,9 +9,7 @@ from tests.ui.utils.UI_config import (BASE_UI_URL, VALID_USR, VALID_PWD)
 scenarios("../features/customers.feature")
 
 @given("I am logged into the portal")
-def logged_in_user(
-        browser_page,
-        context):
+def logged_in_user(browser_page,context):
 
     login_page = LoginPage(browser_page)
 
@@ -31,9 +24,7 @@ def logged_in_user(
 @given("I am on the customers screen")
 def open_customers_page(context):
 
-    customer_page = CustomerPage(
-        context["page"]
-    )
+    customer_page = CustomerPage(context["page"])
 
     customer_page.navigate()
 
@@ -43,43 +34,31 @@ def open_customers_page(context):
 @when("The page loads")
 def page_load(context):
 
-    assert (
-        context["customer_page"]
-        .is_page_loaded()
-    )
+    assert (context["customer_page"].is_page_loaded())
 
 
 @then("A table with customer records is visible")
 def table_visible(context):
 
-    assert (
-        context["customer_page"]
-        .customer_table_visible()
-    )
+    assert (context["customer_page"].customer_table_visible())
 
 
 @when("I type a name in the search box")
 def search_customer(context):
 
-    context["customer_page"].search_customer(
-        "LISA"
-    )
+    context["customer_page"].search_customer("LISA")
 
 
 @then("Only matching customers are shown in the table")
 def validate_search_results(context):
 
-    names = (
-        context["customer_page"]
-        .get_customer_names()
-    )
+    names = (context["customer_page"].get_customer_names())
+
+    print(f"available names: {names}")
 
     for name in names:
 
-        assert (
-            "LISA"
-            in name.upper()
-        )
+        assert ("LISA"in name.upper())
 
 
 @when("I select a status from the filter dropdown")
@@ -109,7 +88,4 @@ def click_customer(context):
 @then("I navigate to that customer's detail page with all fields visible")
 def validate_customer_detail(context):
 
-    assert (
-        context["customer_page"]
-        .customer_detail_visible()
-    )
+    assert (context["customer_page"].customer_detail_visible())
