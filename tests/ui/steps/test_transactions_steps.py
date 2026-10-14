@@ -63,7 +63,7 @@ def validate_credit(context):
 
     for txn_type in txn_types:
 
-        assert (txn_type.lower() == "credit")
+        assert (txn_type.lower() == "Credit")
 
 @when("I select status = Completed")
 def filter_status(context):
@@ -79,7 +79,7 @@ def validate_status(context):
 
     for txn_status in statuses:
 
-        assert (txn_status.lower() == "completed")
+        assert (txn_status.lower() == "Completed")
 
 
 @when("I set a from_date and to_date and apply")

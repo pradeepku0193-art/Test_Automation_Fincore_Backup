@@ -54,7 +54,7 @@ def validate_active_loans(context):
 
     for status in statuses:
 
-        assert (status.lower() == "Active")
+        assert (status.lower() == "active")
 
 @when("I select type = Personal")
 def select_personal_type(context):
@@ -70,7 +70,7 @@ def validate_personal_loans(context):
 
     for type in types:
 
-        assert (type.lower() == "Personal")
+        assert (type.lower() == "personal")
 
 @when("I click loan row")
 def click_loan_row(context):

@@ -1,0 +1,4 @@
+status_code,expected_status
+1,active
+2,inactive
+3,blocked

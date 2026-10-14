@@ -1,0 +1,5 @@
+currency_input,expected_currency
+,USD
+USD,USD
+EUR,EUR
+INR,INR
