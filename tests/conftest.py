@@ -21,6 +21,15 @@ def db_client():
     return DBClient(DB_CONFIG)
 
 
+@pytest.fixture
+def db_connection(db_client):
+    connection = db_client.get_connection()
+    try:
+        yield connection
+    finally:
+        connection.close()
+
+
 #AUTHENTICATION FIXTURES
 
 @pytest.fixture(scope="session")
@@ -50,6 +59,11 @@ def auth_token(api_client):
     assert "user" in response_json
 
     return response_json["token"]
+
+
+@pytest.fixture(scope="session")
+def valid_credentials():
+    return {"username": TEST_USER, "password": TEST_PASSWORD}
 
 #AUTHENTICATED CLIENT FIXTURE
 

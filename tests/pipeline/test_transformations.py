@@ -1,14 +1,5 @@
-import os
-import sys
-
 import pytest
 import pandas as pd
-
-# Use the active interpreter instead of PySpark's Unix-oriented python3 default.
-os.environ.setdefault("PYSPARK_PYTHON", sys.executable)
-os.environ.setdefault("PYSPARK_DRIVER_PYTHON", sys.executable)
-
-from pyspark.sql import SparkSession
 
 from pipeline.transformations import(
     standardise_name,
@@ -20,28 +11,13 @@ from pipeline.transformations import(
     filter_zero_amounts
 )
 
-@pytest.fixture(scope="session")
-def spark():
-    spark = (
-        SparkSession.builder
-        .master("local[*]")
-        .appName("UC4 Pipeline Tests")
-        .getOrCreate()
-    )
-
-    yield spark
-
-    spark.stop()
-
 #laod test data from CSV files into pandas DataFrames
 def load_csv(file_path):
     return pd.read_csv(file_path).to_dict("records")
 
 
 #validate the standardise_name transformation
-name_test_data = load_csv(
-    "tests/test_data/standardise_name.csv"
-)
+name_test_data = load_csv("tests/test_data/standardise_name.csv")
 
 
 
@@ -153,7 +129,7 @@ def test_fill_default_currency(spark,row):
         else row["currency_input"]
     )
 
-    df = spark.createDataFrame([(value,)],["currency"])
+    df = spark.createDataFrame([(value,)], "currency string")
 
     result = fill_default_currency(df)
 

@@ -1,1 +1,4 @@
-GX_ROOT = "/workspaces/Test_Automation_Fincore_Backup/tests/dq/great_expectations/gx"
+from pathlib import Path
+
+
+GX_ROOT = str(Path(__file__).resolve().parent)

@@ -149,12 +149,12 @@ def map_status_code(df: DataFrame, column_name: str, code_mapping: dict) -> Data
     mapping_expr = None
     for code, label in code_mapping.items():
         if mapping_expr is None:
-            mapping_expr = when(col(column_name) == code, lit(label))
+            mapping_expr = when(col(column_name).cast("string") == str(code), lit(label))
         else:
-            mapping_expr = mapping_expr.when(col(column_name) == code, lit(label))
+            mapping_expr = mapping_expr.when(col(column_name).cast("string") == str(code), lit(label))
     
     # Add otherwise clause for unmapped values
-    mapping_expr = mapping_expr.otherwise(col(column_name))
+    mapping_expr = mapping_expr.otherwise(col(column_name).cast("string"))
     
     # Replace the column
     return df.withColumn(column_name, mapping_expr)

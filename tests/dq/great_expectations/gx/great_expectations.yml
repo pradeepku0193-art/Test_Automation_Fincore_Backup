@@ -18,7 +18,7 @@ datasources:
     class_name: Datasource
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
-      connection_string: ${fincore_conn}   # variable substitution
+      connection_string: ${FINCORE_CONN}   # variable substitution
     data_connectors:
       default_inferred_data_connector_name:
         class_name: InferredAssetSqlDataConnector
@@ -98,7 +98,7 @@ data_docs_sites:
     show_how_to_buttons: false
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: /workspaces/Test_Automation_Fincore_Backup/tests/dq/great_expectations/gx/uncommitted/data_docs/dq_good/
+      base_directory: uncommitted/data_docs/dq_good/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
@@ -107,7 +107,7 @@ data_docs_sites:
     show_how_to_buttons: false
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: /workspaces/Test_Automation_Fincore_Backup/tests/dq/great_expectations/gx/uncommitted/data_docs/dq_bad/
+      base_directory: uncommitted/data_docs/dq_bad/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
   

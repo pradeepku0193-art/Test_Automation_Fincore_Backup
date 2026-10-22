@@ -25,11 +25,11 @@ class ExpectEndDateAfterStartDate(QueryExpectation):
         query_result = list(metrics.get("query.template_values"))
         unexpected_count = query_result[0].get("unexpected_count", 0)
         total_count = query_result[0].get("total_count", 1) or 1
-        sucess = unexpected_count == 0
+        success = unexpected_count == 0
         unexpected_percent = ((unexpected_count/total_count *100 ) if total_count > 0 else 0)
 
         return{
-            "sucess" : sucess,
+            "success" : success,
             "result" :{
                 "unexpected_count" : unexpected_count,
                 "unexpected_percent" : round(unexpected_percent, 4),

@@ -71,6 +71,35 @@
       "meta": {}
     },
     {
+  "expectation_type": "expect_column_values_to_be_between",
+  "kwargs": {
+    "column": "loan_duration_days",
+    "min_value": 1
+  },
+  "meta": {
+    "business_rule": "Computed loan duration must be positive"
+  }
+  },
+  {
+  "expectation_type": "expect_column_values_to_not_be_null",
+  "kwargs": {
+    "column": "emi_amount"
+  },
+  "meta": {
+    "business_rule": "EMI must be calculated for all loans"
+  }
+},
+{
+  "expectation_type": "expect_column_values_to_be_between",
+  "kwargs": {
+    "column": "emi_amount",
+    "min_value": 0.01
+  },
+  "meta": {
+    "business_rule": "Calculated EMI must be greater than zero"
+  }
+},
+    {
       "expectation_type": "expect_column_values_to_not_be_null",
       "kwargs": {
         "column": "loan_duration_days"
