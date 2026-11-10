@@ -182,21 +182,23 @@ pipeline {
 
             echo 'Pipeline FAILED.'
 
-            try {
-                mail(
-                    to: 'pradeep_kumar5@epam.com',
-                    subject: "FinCore Pipeline Failure - Build ${BUILD_NUMBER}",
-                    body: """
-                    Build URL:
-                    ${BUILD_URL}
+            script {
+                try {
+                    mail(
+                        to: 'pradeep_kumar5@epam.com',
+                        subject: "FinCore Pipeline Failure - Build ${BUILD_NUMBER}",
+                        body: """
+                        Build URL:
+                        ${BUILD_URL}
 
-                    Pipeline failed.
+                        Pipeline failed.
 
-                    Please review reports and logs.
-                    """
-                )
-            } catch (Exception exception) {
-                echo "Failure email was not sent: ${exception.message}"
+                        Please review reports and logs.
+                        """
+                    )
+                } catch (Exception exception) {
+                    echo "Failure email was not sent: ${exception.message}"
+                }
             }
         }
     }
