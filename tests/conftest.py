@@ -8,7 +8,7 @@ from tests.api.utils.config import *
 from pytest_html import extras
 import base64
 
-print("✅ Loading tests/conftest.py")
+print("[INFO] Loading tests/conftest.py")
 
 
 @pytest.fixture(scope="session")
