@@ -89,6 +89,18 @@ pipeline {
 
                     set PATH=%JAVA_HOME%\\bin;%PATH%
 
+                    echo ===== CURRENT WORKSPACE =====
+                    echo %WORKSPACE%
+
+                    echo ===== VERIFY DATA FOLDER =====
+                    dir data
+
+                    echo ===== VERIFY GOOD DATA =====
+                    dir data\\good_data
+
+                    echo ===== SEARCH ALL CSV FILES =====
+                    dir /s *.csv
+
                     java -version
 
                     .venv\\Scripts\\python.exe pipeline\\ingest.py good_data
