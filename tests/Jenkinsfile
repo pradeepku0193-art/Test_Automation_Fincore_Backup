@@ -21,6 +21,8 @@ pipeline {
         PYTHONUNBUFFERED = "1"
 
         PYTHON_EXE = "C:\\Users\\PradeepKumar5\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+
+        JAVA_HOME = "C:\\Users\\PradeepKumar5\\AppData\\Local\\Programs\\Eclipse Adoptium\\jdk-17.0.20.8-hotspot"
     }
 
     options {
@@ -51,6 +53,17 @@ pipeline {
             steps {
 
                 bat '''
+                    echo ===== VERIFY JAVA =====
+                    set JAVA_HOME=C:\\Users\\PradeepKumar5\\AppData\\Local\\Programs\\Eclipse Adoptium\\jdk-17.0.20.8-hotspot
+
+                    "%JAVA_HOME%\\bin\\java.exe" -version
+
+                    if errorlevel 1 (
+                        echo Java validation failed
+                        exit /b 1)
+                    
+                    echo ===== VERIFY PYTHON =====
+
                     if not exist "%PYTHON_EXE%" (
                         echo Python was not found or is not accessible to the Jenkins service account:
                         echo %PYTHON_EXE%
@@ -72,6 +85,12 @@ pipeline {
             steps {
 
                 bat '''
+                    set JAVA_HOME=C:\\Users\\PradeepKumar5\\AppData\\Local\\Programs\\Eclipse Adoptium\\jdk-17.0.20.8-hotspot
+
+                    set PATH=%JAVA_HOME%\\bin;%PATH%
+
+                    java -version
+
                     .venv\\Scripts\\python.exe pipeline\\ingest.py good_data
                 '''
             }
