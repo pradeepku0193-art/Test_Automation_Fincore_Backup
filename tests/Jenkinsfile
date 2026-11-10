@@ -54,7 +54,6 @@ pipeline {
 
                 bat '''
                     echo ===== VERIFY JAVA =====
-                    set JAVA_HOME=C:\\Users\\PradeepKumar5\\AppData\\Local\\Programs\\Eclipse Adoptium\\jdk-17.0.20.8-hotspot
 
                     "%JAVA_HOME%\\bin\\java.exe" -version
 
@@ -64,18 +63,23 @@ pipeline {
                     
                     echo ===== VERIFY PYTHON =====
 
-                    if not exist "%PYTHON_EXE%" (
-                        echo Python was not found or is not accessible to the Jenkins service account:
-                        echo %PYTHON_EXE%
-                        exit /b 1
-                    )
-
                     "%PYTHON_EXE%" --version
+
                     "%PYTHON_EXE%" -m venv .venv
+
                     .venv\\Scripts\\python.exe -m pip install --upgrade pip
-                    .venv\\Scripts\\python.exe -m pip install -r pipeline\\requirements.txt -r tests\\requirements.txt -r data\\requirements.txt
-                    .venv\\Scripts\\python.exe -m playwright install chromium
-                    .venv\\Scripts\\python.exe -m pytest --version
+
+                    .venv\\Scripts\\python.exe ^
+                    -m pip install ^
+                    -r pipeline\\requirements.txt ^
+                    -r tests\\requirements.txt ^
+                    -r data\\requirements.txt
+
+                    .venv\\Scripts\\python.exe ^
+                    -m playwright install chromium
+
+                    .venv\\Scripts\\python.exe ^
+                    -m pytest --version
                 '''
             }
         }
@@ -95,21 +99,16 @@ pipeline {
             steps {
 
                 bat '''
-                    set JAVA_HOME=C:\\Users\\PradeepKumar5\\AppData\\Local\\Programs\\Eclipse Adoptium\\jdk-17.0.20.8-hotspot
 
                     set PATH=%JAVA_HOME%\\bin;%PATH%
 
-                    echo ===== CURRENT WORKSPACE =====
-                    echo %WORKSPACE%
+                    set "PYSPARK_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
 
-                    echo ===== VERIFY DATA FOLDER =====
-                    dir data
+                    set "PYSPARK_DRIVER_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
 
-                    echo ===== VERIFY GOOD DATA =====
-                    dir data\\good_data
+                    if not exist "%WORKSPACE%\\spark-temp" mkdir "%WORKSPACE%\\spark-temp"
 
-                    echo ===== SEARCH ALL CSV FILES =====
-                    dir /s *.csv
+                    set "SPARK_LOCAL_DIRS=%WORKSPACE%\\spark-temp"
 
                     java -version
 
@@ -127,7 +126,7 @@ pipeline {
                     set FINCORE_CONN=postgresql+psycopg2://%DB_USER%:%DB_PASSWORD%@%DB_HOST%:%DB_PORT%/%DB_NAME%
 
                     echo FINCORE_CONN configured
-                    
+
                     .venv\\Scripts\\python.exe tests\\dq\\great_expectations\\gx\\run_gx.py
                 '''
             }
@@ -162,6 +161,7 @@ pipeline {
 
                     bat '''
                         .venv\\Scripts\\python.exe -m pytest tests\\ui ^
+
                         --html=tests\\reports\\ui_report.html ^
                         --self-contained-html
                     '''
@@ -169,7 +169,7 @@ pipeline {
             }
         }
 
-        stage('Pipeline Tests (UC4)') {
+        stage('Pipeline Tests (UC4A)') {
 
             steps {
 
@@ -179,27 +179,51 @@ pipeline {
                 ) {
 
                     bat '''
-                        .venv\\Scripts\\python.exe -m pytest tests\\pipeline ^
-                        --html=tests\\reports\\pipeline_report.html ^
+                        set "PATH=%JAVA_HOME%\\bin;%PATH%"
+
+                        set "PYSPARK_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
+                        set "PYSPARK_DRIVER_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
+
+                        if not exist "%WORKSPACE%\\spark-temp" mkdir "%WORKSPACE%\\spark-temp"
+
+                        set "SPARK_LOCAL_DIRS=%WORKSPACE%\\spark-temp"
+
+
+                        .venv\\Scripts\\python.exe 
+                        -m pytest tests\\pipeline\\test_transformations.py ^
+                        --html=tests\\reports\\pipeline_unit_report.html ^
                         --self-contained-html
                     '''
                 }
             }
         }
 
-        stage('Archive Reports') {
+
+        stage('Pipeline E2E Tests (UC4C)') {
 
             steps {
 
-                archiveArtifacts(
-                    artifacts:
+                catchError(
+                    buildResult: 'UNSTABLE',
+                    stageResult: 'FAILURE'
+                ) {
+
+                    bat '''
+                        set "PATH=%JAVA_HOME%\\bin;%PATH%"
+
+                        set "PYSPARK_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
+                        set "PYSPARK_DRIVER_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
+
+                        if not exist "%WORKSPACE%\\spark-temp" mkdir "%WORKSPACE%\\spark-temp"
+
+                        set "SPARK_LOCAL_DIRS=%WORKSPACE%\\spark-temp"
+
+                        .venv\\Scripts\\python.exe ^
+                        -m pytest tests\\pipeline\\test_E_to_E.py ^
+                        --html=tests\\reports\\pipeline_e2e_report.html ^
+                        --self-contained-html
                     '''
-                    tests/reports/**/*.html,
-                    tests/reports/**/*.png,
-                    tests/dq/great_expectations/gx/uncommitted/data_docs/**
-                    ''',
-                    allowEmptyArchive: true
-                )
+                }
             }
         }
 
@@ -212,20 +236,31 @@ pipeline {
         }
     }
 
-    post {
-
+        post {
         always {
-
             echo 'Pipeline execution completed.'
+
+            archiveArtifacts(
+                artifacts: '''
+                    tests/reports/**/*.html,
+                    tests/reports/**/*.png,
+                    tests/reports/**/*.zip,
+                    tests/reports/screenshots/**/*,
+                    tests/dq/great_expectations/gx/uncommitted/data_docs/**
+                ''',
+                allowEmptyArchive: true
+            )
         }
 
         success {
-
             echo 'All validations passed.'
         }
 
-        failure {
+        unstable {
+            echo 'One or more validation stages failed.'
+        }
 
+        failure {
             echo 'Pipeline FAILED.'
 
             script {
@@ -234,12 +269,9 @@ pipeline {
                         to: 'pradeep_kumar5@epam.com',
                         subject: "FinCore Pipeline Failure - Build ${BUILD_NUMBER}",
                         body: """
-                        Build URL:
-                        ${BUILD_URL}
-
-                        Pipeline failed.
-
-                        Please review reports and logs.
+                            Build URL: ${BUILD_URL}
+                            Pipeline failed.
+                            Please review archived reports.
                         """
                     )
                 } catch (Exception exception) {
