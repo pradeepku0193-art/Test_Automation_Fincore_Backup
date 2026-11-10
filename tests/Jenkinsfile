@@ -73,9 +73,19 @@ pipeline {
                     "%PYTHON_EXE%" --version
                     "%PYTHON_EXE%" -m venv .venv
                     .venv\\Scripts\\python.exe -m pip install --upgrade pip
-                    .venv\\Scripts\\python.exe -m pip install -r pipeline\\requirements.txt -r tests\\requirements.txt
+                    .venv\\Scripts\\python.exe -m pip install -r pipeline\\requirements.txt -r tests\\requirements.txt -r data\\requirements.txt
                     .venv\\Scripts\\python.exe -m playwright install chromium
                     .venv\\Scripts\\python.exe -m pytest --version
+                '''
+            }
+        }
+
+        stage('Generate Data') {
+
+            steps {
+
+                bat '''
+                    .venv\\Scripts\\python.exe data\\generate_data.py
                 '''
             }
         }
