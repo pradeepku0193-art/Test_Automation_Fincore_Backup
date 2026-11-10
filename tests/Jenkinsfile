@@ -1,0 +1,190 @@
+pipeline {
+
+    agent any
+
+    environment {
+
+        DB_HOST = "localhost"
+
+        DB_PORT = "5432"
+
+        DB_NAME = "fincore"
+
+        DB_USER = "admin"
+
+        DB_PASSWORD = "fincore123"
+
+        API_BASE_URL = "http://localhost:4000/api/v1"
+
+        UI_BASE_URL = "http://localhost:3000"
+
+        PYTHONUNBUFFERED = "1"
+    }
+
+    options {
+
+        timestamps()
+
+        buildDiscarder(
+            logRotator(
+                numToKeepStr: '20'
+            )
+        )
+    }
+
+    stages {
+
+        stage('Checkout') {
+
+            steps {
+
+                echo "Checking out source code"
+
+                checkout scm
+            }
+        }
+
+        stage('Environment Check') {
+
+            steps {
+
+                bat '''
+                    python --version
+
+                    pip --version
+
+                    pytest --version
+                '''
+            }
+        }
+
+        stage('Load Data') {
+
+            steps {
+
+                sh '''
+                    python pipeline/ingest.py good_data
+                '''
+            }
+        }
+
+        stage('DQ Validation (UC1)') {
+
+            steps {
+
+                sh '''
+                    python tests/dq/great_expectations/gx/run_gx.py
+                '''
+            }
+        }
+
+        stage('API Tests (UC2)') {
+
+            steps {
+
+                catchError(
+                    buildResult: 'UNSTABLE',
+                    stageResult: 'FAILURE'
+                ) {
+
+                    sh '''
+                        pytest tests/api \
+                        --html=tests/reports/api_report.html \
+                        --self-contained-html
+                    '''
+                }
+            }
+        }
+
+        stage('UI Tests (UC3)') {
+
+            steps {
+
+                catchError(
+                    buildResult: 'UNSTABLE',
+                    stageResult: 'FAILURE'
+                ) {
+
+                    sh '''
+                        pytest tests/ui \
+                        --html=tests/reports/ui_report.html \
+                        --self-contained-html
+                    '''
+                }
+            }
+        }
+
+        stage('Pipeline Tests (UC4)') {
+
+            steps {
+
+                catchError(
+                    buildResult: 'UNSTABLE',
+                    stageResult: 'FAILURE'
+                ) {
+
+                    sh '''
+                        pytest tests/pipeline \
+                        --html=tests/reports/pipeline_report.html \
+                        --self-contained-html
+                    '''
+                }
+            }
+        }
+
+        stage('Archive Reports') {
+
+            steps {
+
+                archiveArtifacts(
+                    artifacts:
+                    '''
+                    tests/reports/**/*.html,
+                    tests/reports/**/*.png,
+                    tests/dq/great_expectations/gx/uncommitted/data_docs/**
+                    ''',
+                    allowEmptyArchive: true
+                )
+            }
+        }
+
+        stage('Notify') {
+
+            steps {
+
+                echo "Build Result: ${currentBuild.currentResult}"
+            }
+        }
+    }
+
+    post {
+
+        always {
+
+            echo 'Pipeline execution completed.'
+        }
+
+        success {
+
+            echo 'All validations passed.'
+        }
+
+        failure {
+
+            echo 'Pipeline FAILED.'
+
+            mail(
+                to: 'pradeep_kumar5@epam.com',
+                subject: "FinCore Pipeline Failure - Build ${BUILD_NUMBER}",
+                body: """
+                Build URL:
+                ${BUILD_URL}
+
+                Pipeline failed.
+
+                Please review reports and logs.
+                """
+            )
+        }
+    }
+}
