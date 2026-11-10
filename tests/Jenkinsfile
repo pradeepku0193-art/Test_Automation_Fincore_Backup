@@ -19,6 +19,8 @@ pipeline {
         UI_BASE_URL = "http://localhost:3000"
 
         PYTHONUNBUFFERED = "1"
+
+        PYTHON_EXE = "C:\\Users\\PradeepKumar5\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
     }
 
     options {
@@ -49,11 +51,18 @@ pipeline {
             steps {
 
                 bat '''
-                    python --version
+                    if not exist "%PYTHON_EXE%" (
+                        echo Python was not found or is not accessible to the Jenkins service account:
+                        echo %PYTHON_EXE%
+                        exit /b 1
+                    )
 
-                    pip --version
-
-                    pytest --version
+                    "%PYTHON_EXE%" --version
+                    "%PYTHON_EXE%" -m venv .venv
+                    .venv\\Scripts\\python.exe -m pip install --upgrade pip
+                    .venv\\Scripts\\python.exe -m pip install -r pipeline\\requirements.txt -r tests\\requirements.txt
+                    .venv\\Scripts\\python.exe -m playwright install chromium
+                    .venv\\Scripts\\python.exe -m pytest --version
                 '''
             }
         }
@@ -62,8 +71,8 @@ pipeline {
 
             steps {
 
-                sh '''
-                    python pipeline/ingest.py good_data
+                bat '''
+                    .venv\\Scripts\\python.exe pipeline\\ingest.py good_data
                 '''
             }
         }
@@ -72,8 +81,8 @@ pipeline {
 
             steps {
 
-                sh '''
-                    python tests/dq/great_expectations/gx/run_gx.py
+                bat '''
+                    .venv\\Scripts\\python.exe tests\\dq\\great_expectations\\gx\\run_gx.py
                 '''
             }
         }
@@ -87,9 +96,9 @@ pipeline {
                     stageResult: 'FAILURE'
                 ) {
 
-                    sh '''
-                        pytest tests/api \
-                        --html=tests/reports/api_report.html \
+                    bat '''
+                        .venv\\Scripts\\python.exe -m pytest tests\\api ^
+                        --html=tests\\reports\\api_report.html ^
                         --self-contained-html
                     '''
                 }
@@ -105,9 +114,9 @@ pipeline {
                     stageResult: 'FAILURE'
                 ) {
 
-                    sh '''
-                        pytest tests/ui \
-                        --html=tests/reports/ui_report.html \
+                    bat '''
+                        .venv\\Scripts\\python.exe -m pytest tests\\ui ^
+                        --html=tests\\reports\\ui_report.html ^
                         --self-contained-html
                     '''
                 }
@@ -123,9 +132,9 @@ pipeline {
                     stageResult: 'FAILURE'
                 ) {
 
-                    sh '''
-                        pytest tests/pipeline \
-                        --html=tests/reports/pipeline_report.html \
+                    bat '''
+                        .venv\\Scripts\\python.exe -m pytest tests\\pipeline ^
+                        --html=tests\\reports\\pipeline_report.html ^
                         --self-contained-html
                     '''
                 }
@@ -173,18 +182,22 @@ pipeline {
 
             echo 'Pipeline FAILED.'
 
-            mail(
-                to: 'pradeep_kumar5@epam.com',
-                subject: "FinCore Pipeline Failure - Build ${BUILD_NUMBER}",
-                body: """
-                Build URL:
-                ${BUILD_URL}
+            try {
+                mail(
+                    to: 'pradeep_kumar5@epam.com',
+                    subject: "FinCore Pipeline Failure - Build ${BUILD_NUMBER}",
+                    body: """
+                    Build URL:
+                    ${BUILD_URL}
 
-                Pipeline failed.
+                    Pipeline failed.
 
-                Please review reports and logs.
-                """
-            )
+                    Please review reports and logs.
+                    """
+                )
+            } catch (Exception exception) {
+                echo "Failure email was not sent: ${exception.message}"
+            }
         }
     }
 }
