@@ -123,6 +123,11 @@ pipeline {
             steps {
 
                 bat '''
+
+                    set FINCORE_CONN=postgresql+psycopg2://%DB_USER%:%DB_PASSWORD%@%DB_HOST%:%DB_PORT%/%DB_NAME%
+
+                    echo FINCORE_CONN configured
+                    
                     .venv\\Scripts\\python.exe tests\\dq\\great_expectations\\gx\\run_gx.py
                 '''
             }
