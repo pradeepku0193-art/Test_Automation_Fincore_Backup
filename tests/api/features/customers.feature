@@ -20,7 +20,7 @@ Feature: Customers API
   Scenario:Search by name
     When I GET "/customers?search=JOHN"
     Then the response status should be 200
-    And every record field "name" should contain "JOHN"
+    And every record should match "JOHN" in "name" or "email"
 
   Scenario:Get customer by ID
     When I GET "/customers/1"

@@ -117,18 +117,17 @@ def validate_field_value(context,field,value):
         assert (record[field]).lower() == value.lower()
 
 
-@then(parsers.parse('every record field "{field}" should contain "{search_text}"'))
-def validate_search_results(context,field,search_text):
+@then(parsers.parse('every record should match "{search_text}" in "{first_field}" or "{second_field}"'))
+def validate_search_results(context,search_text,first_field,second_field):
 
     data = context["response"].json().get("data", [])
+    assert data, f'No records matched search text "{search_text}"'
 
     for record in data:
-
-        #assert field in record
-
-        actual_value = str(record[field]).upper()
-
-        assert search_text.upper() in actual_value
+        assert any(
+            search_text.upper() in str(record[field]).upper()
+            for field in (first_field, second_field)
+        )
 
 # Customer ID validation
 

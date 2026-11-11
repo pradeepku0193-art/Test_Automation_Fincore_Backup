@@ -23,7 +23,7 @@ WHERE status='active'
 CUSTOMER_BY_ID = """
 SELECT id,email, status
 FROM public.customers
-WHERE id = 5959
+WHERE id = %s
 """
 
 TRANSACTION_BY_ID = """
