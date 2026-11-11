@@ -132,8 +132,8 @@ def validate_search_results(context,field,search_text):
 
 # Customer ID validation
 
-@then(parsers.parse('the returned customer should have "id" equal to 5959'))
-def validate_customer_id(context,expected_id=5959):
+@then(parsers.parse('the returned customer should have "id" equal to {expected_id:d}'))
+def validate_customer_id(context,expected_id):
 
     customer = context["response"].json().get("customer", {})
 

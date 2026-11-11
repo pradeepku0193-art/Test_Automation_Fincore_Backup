@@ -245,6 +245,7 @@ def stage_7_dashboard_summary_check(db_connection, page, valid_credentials) -> d
         login_page = LoginPage(page)
         login_page.open(DASHBOARD_URL)
         login_page.login(valid_credentials["username"], valid_credentials["password"])
+        page.wait_for_url("**/dashboard")
 
         summary_locator = page.get_by_test_id("summary-loans").locator("p").nth(1)
         displayed_text = summary_locator.inner_text().strip()
