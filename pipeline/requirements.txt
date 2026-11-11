@@ -1,5 +1,5 @@
 # PySpark and dependencies
-pyspark==3.4.1
+pyspark==4.0.4
 
 # Database connectivity
 psycopg2-binary==2.9.9
