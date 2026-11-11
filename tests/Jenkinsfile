@@ -160,10 +160,7 @@ pipeline {
                 ) {
 
                     bat '''
-                        .venv\\Scripts\\python.exe -m pytest tests\\ui ^
-
-                        --html=tests\\reports\\ui_report.html ^
-                        --self-contained-html
+                        .venv\\Scripts\\python.exe -m pytest tests\\ui --html=tests\\reports\\ui_report.html --self-contained-html
                     '''
                 }
             }
@@ -189,10 +186,7 @@ pipeline {
                         set "SPARK_LOCAL_DIRS=%WORKSPACE%\\spark-temp"
 
 
-                        .venv\\Scripts\\python.exe 
-                        -m pytest tests\\pipeline\\test_transformations.py ^
-                        --html=tests\\reports\\pipeline_unit_report.html ^
-                        --self-contained-html
+                        .venv\\Scripts\\python.exe -m pytest tests\\pipeline\\test_transformations.py --html=tests\\reports\\pipeline_unit_report.html --self-contained-html
                     '''
                 }
             }
