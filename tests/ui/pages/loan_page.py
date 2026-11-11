@@ -32,13 +32,13 @@ class LoanPage:
 
     def select_status(self, status):
 
-        self.page.select_option(self.status_dropdown, label = status)
+        self.page.select_option(self.status_dropdown, label = status.title())
 
         self.page.wait_for_timeout(2000)  # Wait for the table to refresh after applying the filter
 
     def select_type(self, type):
         
-        self.page.select_option(self.type_dropdown, label = type)
+        self.page.select_option(self.type_dropdown, label = type.title())
 
         self.page.wait_for_timeout(2000)  # Wait for the table to refresh after applying the filter
     

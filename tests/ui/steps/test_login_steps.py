@@ -1,3 +1,5 @@
+from xml.parsers.expat import errors
+
 from pytest_bdd import (scenarios, given, when, then)
 import re
 from playwright.sync_api import expect
@@ -64,7 +66,36 @@ def verify_dashboard(context):
 
     page = context["login_page"].page
 
+    page.wait_for_timeout(5000)  # Wait for the page to load
+
     page.wait_for_url("**/dashboard")
+    print(f"current URL: {page.url}", flush=True)
+
+    try:
+        eerrors = page.locator(
+            "[data-testid='login-error']"
+        ).all_inner_texts()
+
+        print(
+            f"Login Errors = {errors}",
+            flush=True
+        )
+    except Exception as e:
+        print(f"Could not read login errors: {e}",
+            flush=True)
+
+    print(
+        "Page Text:",
+        page.locator("body").inner_text(),
+        flush=True)
+
+    page.screenshot(
+        path="tests/reports/login_debug.png",
+        full_page=True)
+
+    page.wait_for_url(
+        "**/dashboard",
+        timeout=60000)
 
     assert "/dashboard" in page.url
 

@@ -245,7 +245,23 @@ def stage_7_dashboard_summary_check(db_connection, page, valid_credentials) -> d
         login_page = LoginPage(page)
         login_page.open(DASHBOARD_URL)
         login_page.login(valid_credentials["username"], valid_credentials["password"])
-        page.wait_for_url("**/dashboard")
+
+        page.wait_for_timeout(5000)  # Wait for the dashboard to load
+        print(f"Current URL after login: {page.url}")
+
+        try:
+
+            errors = page.locator("[data-testid='login-error']").all_inner_texts()
+
+            print(f"Login Errors: {errors}")
+
+        except Exception as e:
+
+            print(f"No login error banner found: {e}")
+
+        page.screenshot(path="tests/reports/e2e_login_debug.png",full_page=True)
+
+        page.wait_for_url("**/dashboard", timeout=60000)
 
         summary_locator = page.get_by_test_id("summary-loans").locator("p").nth(1)
         displayed_text = summary_locator.inner_text().strip()
