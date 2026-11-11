@@ -13,7 +13,7 @@ from tests.api.utils.config import DB_CONFIG
 
 DATA_ROOT = "data"
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:4000/api/v1")
-DASHBOARD_URL = "http://localhost:3000/dashboard"  
+DASHBOARD_URL = "http://localhost:3000"  
 
 
 def build_auth_headers(token: str) -> dict:
@@ -119,8 +119,8 @@ def stage_3_row_count_check(db_connection, data_dir: str) -> dict:
             )
             return {
                 "stage": "3_row_count_check",
-                "status": "PASS",
-                "detail": f"WARNING: count mismatch detected: {detail}",
+                "status": "FAIL",
+                "detail": detail
             }
 
         return {
@@ -208,11 +208,11 @@ def stage_6_computed_field_via_api(db_connection, auth_token: str) -> dict:
     """Assert a computed field (loan_duration_days) is correctly returned by the API."""
     try:
         with db_connection.cursor() as cur:
-            cur.execute("SELECT id, loan_duration_days FROM loans LIMIT 1")
+            cur.execute("SELECT id, loan_duration_days,emi_amount FROM loans LIMIT 1")
             row = cur.fetchone()
             if row is None:
                 return {"stage": "6_computed_field", "status": "FAIL", "detail": "No loans found in DB to check"}
-            loan_id, expected_duration = row
+            loan_id, expected_duration,expected_emi = row
 
         response = requests.get(
             f"{API_BASE_URL}/loans/{loan_id}",
@@ -228,7 +228,14 @@ def stage_6_computed_field_via_api(db_connection, auth_token: str) -> dict:
                 "stage": "6_computed_field", "status": "FAIL",
                 "detail": f"loan_duration_days mismatch: DB={expected_duration}, API={api_duration}"
             }
-        return {"stage": "6_computed_field", "status": "PASS", "detail": f"loan_duration_days matched: {api_duration}"}
+        api_emi = float(loan["emi_amount"])
+        if api_emi <= 0:
+            return {
+                "stage": "6_computed_field", "status": "FAIL",
+                "detail": (f"invalid EMI amount returned: API={api_emi}"
+                           f"by API :{api_emi} and by DB :{expected_emi}")
+                        }
+        return {"stage": "6_computed_field", "status": "PASS", "detail": (f"loan_duration_days matched: {api_duration}"f"emi_amount = {api_emi}")}
     except Exception as e:
         return {"stage": "6_computed_field", "status": "FAIL", "detail": str(e)}
 
@@ -281,9 +288,13 @@ def stage_7_dashboard_summary_check(db_connection, page, valid_credentials) -> d
 
 def stage_8_generate_report(results: dict, data_dir: str) -> dict:
     """Report the full E2E result as PASS or FAIL with stage-level detail."""
-    overall_status = "PASS" if all(
-        r["status"] in ("PASS", "SKIPPED") for r in results.values()
-    ) else "FAIL"
+    overall_status = (
+        "PASS"
+        if all(
+            r["status"] == "PASS"
+            for name, r in results.items()
+            if name != "stage_8_report")
+        else "FAIL")
 
     report_name = "pipeline_report_good.html" if data_dir == "good_data" else "pipeline_report_bad.html"
     report_path = f"tests/reports/{report_name}"
