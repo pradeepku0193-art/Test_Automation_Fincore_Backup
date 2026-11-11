@@ -1,6 +1,6 @@
 import os
 
-BASE_URL = "http://localhost:4000/api/v1"
+BASE_URL = os.getenv("API_BASE_URL", "http://localhost:4000/api/v1")
 
 TEST_USER = "testuser"
 TEST_PASSWORD = "Test@123"

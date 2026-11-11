@@ -12,10 +12,10 @@ Feature: Customers API
     And the reported total should match the DB count of "customers"
 
   Scenario:Filter active customers 
-    When I GET "customers?status=active"
+    When I GET "/customers?status=active"
     Then the response status should be 200
     And every record should have "status" equal to "active"
-    And the reported total should match the active customera DB count
+    And the reported total should match the active customers DB count
 
   Scenario:Search by name
     When I GET "/customers?search=JOHN"
@@ -23,7 +23,7 @@ Feature: Customers API
     And every record field "name" should contain "JOHN"
 
   Scenario:Get customer by ID
-    When I GET " /customers/1"
+    When I GET "/customers/1"
     Then the response status should be 200
     And the returned customer should have "id" equal to 1
     And the returned customer should match the DB row for customer id 1
