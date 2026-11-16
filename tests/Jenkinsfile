@@ -247,21 +247,6 @@ pipeline {
                 ''',
                 allowEmptyArchive: true
             )
-        }
-
-        success {
-            echo 'All validations passed.'
-        }
-
-        unstable {
-            echo 'One or more validation stages failed.'
-        }
-
-        failure {
-            echo 'Pipeline FAILED.'
-        }
-
-        always {
             script {
                 if (currentBuild.currentResult in ['UNSTABLE', 'FAILURE']) {
                     try {
@@ -279,6 +264,18 @@ pipeline {
                     }
                 }
             }
+        }
+
+        success {
+            echo 'All validations passed.'
+        }
+
+        unstable {
+            echo 'One or more validation stages failed.'
+        }
+
+        failure {
+            echo 'Pipeline FAILED.'
         }
     }
 }
