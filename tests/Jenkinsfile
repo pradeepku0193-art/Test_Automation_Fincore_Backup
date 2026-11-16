@@ -10,10 +10,6 @@ pipeline {
 
         DB_NAME = "fincore"
 
-        DB_USER = "admin"
-
-        DB_PASSWORD = "fincore123"
-
         API_BASE_URL = "http://localhost:4000/api/v1"
 
         UI_BASE_URL = "http://localhost:3000"
@@ -98,7 +94,8 @@ pipeline {
 
             steps {
 
-                bat '''
+                withCredentials([usernamePassword(credentialsId: 'fincore-db', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
+                    bat '''
 
                     set PATH=%JAVA_HOME%\\bin;%PATH%
 
@@ -113,22 +110,24 @@ pipeline {
                     java -version
 
                     .venv\\Scripts\\python.exe pipeline\\ingest.py good_data
-                '''
+                    '''
+                }
             }
         }
 
         stage('DQ Validation (UC1)') {
 
             steps {
+                withCredentials([usernamePassword(credentialsId: 'fincore-db', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
+                    bat '''
 
-                bat '''
-
-                    set FINCORE_CONN=postgresql+psycopg2://%DB_USER%:%DB_PASSWORD%@%DB_HOST%:%DB_PORT%/%DB_NAME%
+                    set "FINCORE_CONN=postgresql+psycopg2://%DB_USER%:%DB_PASSWORD%@%DB_HOST%:%DB_PORT%/%DB_NAME%"
 
                     echo FINCORE_CONN configured
 
                     .venv\\Scripts\\python.exe tests\\dq\\great_expectations\\gx\\run_gx.py
-                '''
+                    '''
+                }
             }
         }
 
@@ -136,16 +135,18 @@ pipeline {
 
             steps {
 
-                catchError(
-                    buildResult: 'UNSTABLE',
-                    stageResult: 'FAILURE'
-                ) {
+                withCredentials([usernamePassword(credentialsId: 'fincore-db', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
+                    catchError(
+                        buildResult: 'UNSTABLE',
+                        stageResult: 'FAILURE'
+                    ) {
 
-                    bat '''
-                        .venv\\Scripts\\python.exe -m pytest tests\\api ^
-                        --html=tests\\reports\\api_report.html ^
-                        --self-contained-html
-                    '''
+                        bat '''
+                            .venv\\Scripts\\python.exe -m pytest tests\\api ^
+                            --html=tests\\reports\\api_report.html ^
+                            --self-contained-html
+                        '''
+                    }
                 }
             }
         }
@@ -197,26 +198,28 @@ pipeline {
 
             steps {
 
-                catchError(
-                    buildResult: 'UNSTABLE',
-                    stageResult: 'FAILURE'
-                ) {
+                withCredentials([usernamePassword(credentialsId: 'fincore-db', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
+                    catchError(
+                        buildResult: 'UNSTABLE',
+                        stageResult: 'FAILURE'
+                    ) {
 
-                    bat '''
-                        set "PATH=%JAVA_HOME%\\bin;%PATH%"
+                        bat '''
+                            set "PATH=%JAVA_HOME%\\bin;%PATH%"
 
-                        set "PYSPARK_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
-                        set "PYSPARK_DRIVER_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
+                            set "PYSPARK_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
+                            set "PYSPARK_DRIVER_PYTHON=%WORKSPACE%\\.venv\\Scripts\\python.exe"
 
-                        if not exist "%WORKSPACE%\\spark-temp" mkdir "%WORKSPACE%\\spark-temp"
+                            if not exist "%WORKSPACE%\\spark-temp" mkdir "%WORKSPACE%\\spark-temp"
 
-                        set "SPARK_LOCAL_DIRS=%WORKSPACE%\\spark-temp"
+                            set "SPARK_LOCAL_DIRS=%WORKSPACE%\\spark-temp"
 
-                        .venv\\Scripts\\python.exe ^
-                        -m pytest tests\\pipeline\\test_E_to_E.py ^
-                        --html=tests\\reports\\pipeline_e2e_report.html ^
-                        --self-contained-html
-                    '''
+                            .venv\\Scripts\\python.exe ^
+                            -m pytest tests\\pipeline\\test_E_to_E.py ^
+                            --html=tests\\reports\\pipeline_e2e_report.html ^
+                            --self-contained-html
+                        '''
+                    }
                 }
             }
         }
