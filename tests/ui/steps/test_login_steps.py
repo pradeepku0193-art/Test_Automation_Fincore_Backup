@@ -1,7 +1,6 @@
 from xml.parsers.expat import errors
 
 from pytest_bdd import (scenarios, given, when, then)
-import re
 from playwright.sync_api import expect
 
 from tests.ui.pages.login_page import LoginPage
@@ -107,12 +106,7 @@ def verify_error(context):
 
     page = context["login_page"].page
 
-    error_locator = page.get_by_text(
-        re.compile(
-            r"login failed|invalid username or password|authentication failed",
-            re.IGNORECASE
-        )
-    )
+    error_locator = page.locator("[data-testid='login-error']")
 
     expect(error_locator).to_be_visible(timeout=10000)
     #page.wait_for_timeout(3000)

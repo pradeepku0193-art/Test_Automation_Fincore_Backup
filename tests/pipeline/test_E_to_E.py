@@ -7,6 +7,7 @@ import requests
 from urllib.parse import quote_plus
 from datetime import datetime
 from pyspark.sql import SparkSession
+from pipeline.transformations import filter_zero_amounts, remove_duplicates, trim_all_strings
 from tests.ui.pages.login_page import LoginPage
 from tests.api.utils.config import DB_CONFIG
 
@@ -88,7 +89,7 @@ def stage_3_row_count_check(db_connection, data_dir: str) -> dict:
                     }
                 table_row_counts[table] = row_count
 
-        csv_row_counts = {}
+        expected_row_counts = {}
         for table in tables:
             csv_path = os.path.join("data", data_dir, f"{table}.csv")
             if not os.path.exists(csv_path):
@@ -99,22 +100,31 @@ def stage_3_row_count_check(db_connection, data_dir: str) -> dict:
                 }
 
             df = spark.read.csv(csv_path, header=True, inferSchema=True)
-            csv_row_counts[table] = df.count()
-            if csv_row_counts[table] == 0:
+            df = trim_all_strings(df)
+            if table == "customers":
+                df = remove_duplicates(df, ["email"])
+            elif table == "accounts":
+                df = remove_duplicates(df, ["account_number"])
+            elif table == "transactions":
+                df = filter_zero_amounts(df, "amount")
+                df = remove_duplicates(df, ["reference_id"])
+
+            expected_row_counts[table] = df.count()
+            if expected_row_counts[table] == 0:
                 return {
                     "stage": "3_row_count_check",
                     "status": "FAIL",
-                    "detail": f"CSV file for table {table} is empty (0 rows)",
+                    "detail": f"Transformed CSV data for table {table} is empty (0 rows)",
                 }
 
         mismatches = [
             table for table in tables
-            if table_row_counts[table] != csv_row_counts[table]
+            if table_row_counts[table] != expected_row_counts[table]
         ]
 
         if mismatches:
             detail = "; ".join(
-                f"{table}: DB={table_row_counts[table]}, CSV={csv_row_counts[table]}"
+                f"{table}: DB={table_row_counts[table]}, transformed CSV={expected_row_counts[table]}"
                 for table in mismatches
             )
             return {

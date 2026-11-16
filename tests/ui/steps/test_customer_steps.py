@@ -74,6 +74,8 @@ def validate_status(context):
 
     print(f"statusses : {statuses}")
 
+    assert statuses, "No customers were displayed after applying the status filter"
+
     for status in statuses:
 
         assert (status.lower()== "active")

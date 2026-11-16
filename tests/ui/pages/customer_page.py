@@ -69,7 +69,12 @@ class CustomerPage:
 
     def filter_status(self,status):
 
-        self.page.select_option(self.status_dropdown,label=status)
+        with self.page.expect_response(
+            lambda response: "/customers" in response.url and response.ok
+        ):
+            self.page.select_option(self.status_dropdown, value=status)
+
+        self.page.locator(self.table_rows).first.wait_for(state="visible")
 
     def get_visible_statuses(self):
 
