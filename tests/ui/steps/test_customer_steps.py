@@ -78,7 +78,7 @@ def validate_status(context):
 
     for status in statuses:
 
-        assert (status.lower()== "Active")
+        assert (status.lower()== "active")
 
 
 @when("I click on a customer row")
