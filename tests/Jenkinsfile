@@ -248,20 +248,19 @@ pipeline {
                 allowEmptyArchive: true
             )
             script {
-                if (currentBuild.currentResult in ['UNSTABLE', 'FAILURE']) {
-                    try {
-                        mail(
-                            to: 'pradeep_kumar5@epam.com',
-                            subject: "FinCore Pipeline ${currentBuild.currentResult} - Build ${BUILD_NUMBER}",
-                            body: """
-                                Build URL: ${BUILD_URL}
-                                Build result: ${currentBuild.currentResult}
-                                Please review archived reports.
-                            """
-                        )
-                    } catch (Exception exception) {
-                        echo "Build notification email was not sent: ${exception.message}"
-                    }
+                try {
+                    mail(
+                        to: 'pradeep_kumar5@epam.com',
+                        subject: "FinCore Pipeline ${currentBuild.currentResult} - Build ${BUILD_NUMBER}",
+                        body: """
+                            Build URL: ${BUILD_URL}
+                            Build result: ${currentBuild.currentResult}
+                            Please review archived reports.
+                        """
+                    )
+                    echo 'Build notification email submitted.'
+                } catch (Exception exception) {
+                    echo "Build notification email failed. Check Jenkins Mailer plugin and SMTP settings. Error: ${exception.message}"
                 }
             }
         }

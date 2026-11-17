@@ -188,6 +188,8 @@ React 18 UI
 - **Username**: admin
 - **Password**: (auto-generated on first run, check logs)
 
+Build notifications are sent to `pradeep_kumar5@epam.com` after every completed run. Configure SMTP in **Manage Jenkins > System > E-mail Notification** and use **Test configuration** to verify delivery. Store any SMTP credentials in Jenkins, not in the Jenkinsfile. If delivery fails, check the build log for the mailer error and verify the Jenkins Mailer plugin and SMTP settings.
+
 ## 📊 Dataset Information
 
 ### Good Data (Clean)
